@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>旅遊手帳｜後臺</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+  <!-- 登入畫面 -->
+  <section id="login-view" hidden>
+    <form id="login-form" class="login-box">
+      <h1>🧳 旅遊手帳後臺</h1>
+      <label>Email<input type="email" name="email" required autocomplete="username"></label>
+      <label>密碼<input type="password" name="password" required autocomplete="current-password"></label>
+      <button type="submit">登入</button>
+    </form>
+  </section>
+
+  <!-- 主畫面 -->
+  <section id="app-view" hidden>
+    <header class="topbar">
+      <h1>🧳 旅遊手帳後臺</h1>
+      <div>
+        <span id="user-email" class="muted"></span>
+        <button id="logout-btn">登出</button>
+      </div>
+    </header>
+
+    <div id="current-trip-bar" class="current-trip-bar">
+      <span id="current-trip-label">尚未選取旅程 — 請先在「旅程」頁籤選取或建立</span>
+    </div>
+
+    <nav class="tabs">
+      <button class="tab active" data-tab="trips">旅程</button>
+      <button class="tab" data-tab="flights" disabled>航班</button>
+      <button class="tab" data-tab="stays" disabled>住宿</button>
+      <button class="tab" data-tab="transport" disabled>交通卡片</button>
+      <button class="tab" data-tab="expenses" disabled>記帳</button>
+      <button class="tab" data-tab="photos" disabled>照片</button>
+    </nav>
+
+    <!-- 旅程 -->
+    <main id="tab-trips" class="tab-panel">
+      <h2>我的旅程</h2>
+      <div id="trip-list" class="list"></div>
+
+      <h2 id="trip-form-title">新增旅程</h2>
+      <form id="trip-form" class="form-grid">
+        <label>標題 *<input name="title" required placeholder="例：馬爾地夫＋普吉島 2026"></label>
+        <label>目的地<input name="destination" placeholder="例：馬爾地夫、普吉島"></label>
+        <label>開始日期<input type="date" name="start_date"></label>
+        <label>結束日期<input type="date" name="end_date"></label>
+        <label>狀態
+          <select name="status">
+            <option value="planning">規劃中</option>
+            <option value="traveling">旅途中</option>
+            <option value="done">已完成</option>
+          </select>
+        </label>
+        <label class="checkbox"><input type="checkbox" name="is_public">前臺公開這趟旅程</label>
+        <label class="full">封面照網址<input name="cover_photo_url" placeholder="可先留白，之後從照片挑選"></label>
+        <fieldset class="full theme-fieldset">
+          <legend>主題色（骨架不變、換皮膚 — 紙張底色請維持淺色米白系）</legend>
+          <label>主色<input type="color" name="theme_main" value="#7a9e9f"></label>
+          <label>強調色<input type="color" name="theme_accent" value="#e07a5f"></label>
+          <label>紙張底色<input type="color" name="theme_paper" value="#faf6ee"></label>
+        </fieldset>
+        <div class="full form-actions">
+          <button type="submit">儲存旅程</button>
+          <button type="button" id="trip-form-reset">清空/取消編輯</button>
+        </div>
+      </form>
+    </main>
+
+    <!-- 航班 -->
+    <main id="tab-flights" class="tab-panel" hidden>
+      <h2>航班</h2>
+      <div id="flight-list" class="list"></div>
+
+      <h2>新增／編輯航班</h2>
+      <form id="flight-form" class="form-grid">
+        <label>航段順序<input type="number" name="segment_order" value="1" min="1"></label>
+        <label>航空公司<input name="airline" list="airline-list" placeholder="可下拉選或直接輸入"></label>
+        <datalist id="airline-list">
+          <option value="長榮航空"><option value="中華航空"><option value="星宇航空">
+          <option value="台灣虎航"><option value="國泰航空"><option value="新加坡航空">
+          <option value="泰國航空"><option value="曼谷航空"><option value="亞洲航空 AirAsia">
+          <option value="酷航 Scoot"><option value="阿聯酋航空"><option value="卡達航空">
+          <option value="全日空 ANA"><option value="日本航空 JAL"><option value="樂桃航空">
+          <option value="斯里蘭卡航空"><option value="馬爾地夫國家航空 Maldivian">
+        </datalist>
+        <label>轉乘方式
+          <select name="transfer_type">
+            <option value="">（未指定）</option>
+            <option>直飛</option>
+            <option>轉機行李直掛</option>
+            <option>轉機需提領重掛</option>
+          </select>
+        </label>
+        <label>票種
+          <select name="ticket_type_select">
+            <option value="">（未指定）</option>
+            <option>一般</option>
+            <option>四腿票</option>
+            <option>境外票</option>
+            <option>廉航</option>
+            <option>里程票</option>
+            <option>其他</option>
+          </select>
+          <input name="ticket_type_other" placeholder="自訂票種" hidden>
+        </label>
+        <label>航班號<input name="flight_no" placeholder="例：BR225"></label>
+        <label>出發機場<input name="depart_airport" placeholder="例：TPE"></label>
+        <label>抵達機場<input name="arrive_airport" placeholder="例：MLE"></label>
+        <label>起飛時間<input type="datetime-local" name="depart_time"></label>
+        <label>降落時間<input type="datetime-local" name="arrive_time"></label>
+        <label class="full">轉機資訊<input name="layover_info" placeholder="例：BKK 轉機 2h35m"></label>
+        <label class="full">備註<textarea name="notes" rows="2"></textarea></label>
+        <fieldset class="full private-fieldset">
+          <legend>🔒 私人欄位（僅本人可見，前臺永不顯示）</legend>
+          <label>訂位代號<input name="booking_ref"></label>
+          <label>私人備註<input name="private_notes"></label>
+        </fieldset>
+        <div class="full form-actions">
+          <button type="submit">儲存航班</button>
+          <button type="button" id="flight-form-reset">清空/取消編輯</button>
+        </div>
+      </form>
+    </main>
+
+    <!-- 住宿 -->
+    <main id="tab-stays" class="tab-panel" hidden>
+      <h2>住宿</h2>
+      <div id="stay-list" class="list"></div>
+
+      <h2>新增／編輯住宿</h2>
+      <form id="stay-form" class="form-grid">
+        <label class="full">名稱 *<input name="name" required placeholder="例：Centara Ras Fushi Resort"></label>
+        <label class="full">地址<input name="address"></label>
+        <label>Google Place ID<input name="google_place_id" placeholder="Phase 2 接 Places 後自動帶入"></label>
+        <label>入住日<input type="date" name="check_in"></label>
+        <label>退房日<input type="date" name="check_out"></label>
+        <label class="full">備註<textarea name="notes" rows="2"></textarea></label>
+        <fieldset class="full private-fieldset">
+          <legend>🔒 私人欄位（僅本人可見，前臺永不顯示）</legend>
+          <label>訂單編號<input name="order_no"></label>
+          <label>私人備註<input name="private_notes"></label>
+        </fieldset>
+        <div class="full form-actions">
+          <button type="submit">儲存住宿</button>
+          <button type="button" id="stay-form-reset">清空/取消編輯</button>
+        </div>
+      </form>
+    </main>
+
+    <!-- 交通卡片 -->
+    <main id="tab-transport" class="tab-panel" hidden>
+      <h2>交通卡片</h2>
+      <div id="transport-list" class="list"></div>
+
+      <h2>新增／編輯交通卡片</h2>
+      <form id="transport-form" class="form-grid">
+        <label>類型
+          <select name="card_type">
+            <option>接送</option>
+            <option>租機車</option>
+            <option>火車</option>
+            <option>渡輪</option>
+            <option>巴士</option>
+            <option>快艇/水上飛機</option>
+            <option>其他</option>
+          </select>
+        </label>
+        <label>標題 *<input name="title" required placeholder="例：機場→碼頭 快艇接駁"></label>
+        <label>排序<input type="number" name="sort_order" value="0"></label>
+        <label class="full">內容<textarea name="content" rows="3" placeholder="對讀者最有價值的交通經驗，前臺會以醒目資訊框呈現"></textarea></label>
+        <label class="full">費用參考<input name="cost_note" placeholder="例：USD 50/人 來回"></label>
+        <div class="full form-actions">
+          <button type="submit">儲存卡片</button>
+          <button type="button" id="transport-form-reset">清空/取消編輯</button>
+        </div>
+      </form>
+    </main>
+
+    <!-- 記帳 -->
+    <main id="tab-expenses" class="tab-panel" hidden>
+      <h2>記帳（🔒 僅自己可見，前臺不顯示）</h2>
+      <div id="expense-summary" class="expense-summary"></div>
+      <div id="expense-list" class="list"></div>
+
+      <h2>新增／編輯記帳</h2>
+      <form id="expense-form" class="form-grid">
+        <label>類別
+          <select name="category">
+            <option>住宿</option>
+            <option>機票</option>
+            <option>餐飲</option>
+            <option>交通</option>
+            <option>門票</option>
+            <option>購物</option>
+            <option selected>其他</option>
+          </select>
+        </label>
+        <label>品名 *<input name="title" required placeholder="例：快艇接駁費"></label>
+        <label>消費日期<input type="date" name="spent_on"></label>
+        <label>原幣金額 *<input type="number" name="amount" step="0.01" min="0" required></label>
+        <label>幣別<input name="currency" list="currency-list" value="TWD"></label>
+        <datalist id="currency-list">
+          <option value="TWD"><option value="USD"><option value="THB">
+          <option value="MVR"><option value="JPY"><option value="EUR">
+        </datalist>
+        <label>臺幣約當（選填）<input type="number" name="amount_twd" step="0.01" min="0"></label>
+        <label class="full">關聯到（選填）
+          <select name="link" id="expense-link"><option value="">（不關聯）</option></select>
+        </label>
+        <label class="full">備註<input name="note"></label>
+        <div class="full form-actions">
+          <button type="submit">儲存記帳</button>
+          <button type="button" id="expense-form-reset">清空/取消編輯</button>
+        </div>
+      </form>
+    </main>
+
+    <!-- 照片 -->
+    <main id="tab-photos" class="tab-panel" hidden>
+      <h2>照片上傳</h2>
+      <form id="photo-form" class="form-grid">
+        <label class="full">選擇照片（可多選；會自動壓縮至長邊 1600px、約 350KB 內，原始檔請自行保留於 Google 相簿/硬碟）
+          <input type="file" name="files" accept="image/*" multiple>
+        </label>
+        <label>拍攝日期<input type="date" name="taken_on"></label>
+        <label>說明<input name="caption" placeholder="套用到這批照片"></label>
+        <div class="full form-actions">
+          <button type="submit">壓縮並上傳</button>
+          <span id="photo-progress" class="muted"></span>
+        </div>
+      </form>
+
+      <h2>照片牆</h2>
+      <div id="photo-list" class="photo-grid"></div>
+    </main>
+  </section>
+
+  <script type="module">
+    import { initAuth } from './js/auth.js';
+    import { initTrips, loadTrips } from './js/trips.js';
+    import { initFlights, loadFlights } from './js/flights.js';
+    import { initStays, loadStays } from './js/stays.js';
+    import { initTransport, loadTransport } from './js/transport.js';
+    import { initExpenses, loadExpenses } from './js/expenses.js';
+    import { initPhotos, loadPhotos } from './js/photos.js';
+
+    const loginView = document.getElementById('login-view');
+    const appView = document.getElementById('app-view');
+    let currentTrip = null;
+
+    const loaders = {
+      trips: () => loadTrips(currentTrip?.id ?? null),
+      flights: () => loadFlights(currentTrip),
+      stays: () => loadStays(currentTrip),
+      transport: () => loadTransport(currentTrip),
+      expenses: () => loadExpenses(currentTrip),
+      photos: () => loadPhotos(currentTrip),
+    };
+
+    // 頁籤切換
+    document.querySelectorAll('.tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b === btn));
+        document.querySelectorAll('.tab-panel').forEach(p => p.hidden = p.id !== 'tab-' + btn.dataset.tab);
+        loaders[btn.dataset.tab]();
+      });
+    });
+
+    function selectTrip(trip) {
+      currentTrip = trip;
+      document.getElementById('current-trip-label').textContent =
+        `目前旅程：${trip.title}（${trip.destination ?? ''}）`;
+      document.querySelectorAll('.tab[disabled]').forEach(b => b.disabled = false);
+      loadTrips(trip.id);
+    }
+
+    initTrips(selectTrip);
+    initFlights();
+    initStays();
+    initTransport();
+    initExpenses();
+    initPhotos();
+
+    initAuth({
+      onLogin() {
+        loginView.hidden = true;
+        appView.hidden = false;
+        loadTrips(currentTrip?.id ?? null);
+      },
+      onLogout() {
+        loginView.hidden = false;
+        appView.hidden = true;
+        currentTrip = null;
+      },
+    });
+  </script>
+</body>
+</html>

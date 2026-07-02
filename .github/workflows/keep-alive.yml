@@ -1,0 +1,24 @@
+# 定期 ping Supabase，避免免費專案因 7 天無活動被暫停
+# 需在 GitHub repo 設定兩個 Secrets：
+#   SUPABASE_URL      = https://xifaxliaarxxmvuqcpav.supabase.co
+#   SUPABASE_ANON_KEY = anon/publishable key（Settings → Secrets and variables → Actions）
+# 注意：GitHub 會在 repo 60 天無 commit 後停用排程 workflow，屆時會收到通知信，點一下 re-enable 即可。
+name: Supabase keep-alive
+
+on:
+  schedule:
+    - cron: '0 21 */3 * *' # 每 3 天，UTC 21:00（台灣時間早上 5 點）
+  workflow_dispatch: {}     # 也可手動觸發測試
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST API
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/trips?select=id&limit=1" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+          echo "Supabase 回應 HTTP $code"
+          test "$code" = "200"
