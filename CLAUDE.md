@@ -15,9 +15,12 @@
 
 ## 目錄結構
 
-- `index.html` — 前臺（GitHub Pages 根頁面；Phase 2 實作，含 noindex）
+- `index.html` — 前臺首頁「Lei's Go!」（含 noindex；Hero＋拍立得卡片＋功能區塊）
+- `trip.html` — 旅程內頁（per-trip 主題色＋四頁籤：故事/行程/照片/筆記）
+- `assets/` — 前臺樣式與 JS（front.css 手帳感樣式；front-client.js 唯讀 client）
 - `admin/` — 後臺單頁應用（純 HTML/CSS/JS，無建置步驟；supabase-js 走 CDN ESM）
 - `supabase/migrations/` — schema 記錄
+- `design:reference-mockup.png` — 前臺版面參考圖（不進版控亦可，僅設計參考）
 
 ## 鐵則（摘自 PLAN.md §4）
 
@@ -28,7 +31,8 @@
 
 ## 進度
 
-- Phase 1（本階段）：✅ 建表＋RLS ✅ 後臺登入 ✅ 航班/住宿/交通卡片手動輸入 ✅ 照片上傳（前端壓縮）
-  - 追加：✅ 住宿卡 Google Maps 連結（place_id 定位/名稱地址搜尋）✅ 住宿依入住日排序 ✅ 記帳（expenses，僅本人可見）✅ 航班轉乘方式/票種/航司下拉
-  - 待使用者完成：建立 Supabase Auth 使用者、推上 GitHub、設定 keep-alive secrets、建入馬爾地夫＋普吉島行前資料
-- Phase 2 起：見 PLAN.md §9
+- Phase 1：✅ 建表＋RLS ✅ 後臺登入 ✅ 航班/住宿/交通卡片手動輸入 ✅ 照片上傳（前端壓縮）✅ GitHub repo＋keep-alive
+  - 追加：✅ 住宿卡 Google Maps 連結（place_id 定位/名稱地址搜尋）✅ 住宿依入住日排序 ✅ 記帳（expenses，僅本人可見）✅ 航班轉乘方式/票種/航司下拉 ✅ 記帳付款方式
+- Phase 2（本階段）：✅ 前臺首頁（Hero＋拍立得卡片＋關於我/小貼士；旅行地圖/裝備佔位）✅ 旅程內頁（主題色＋四頁籤，行程安排含 Maps 按鈕）
+  - 待辦：GitHub Pages 開啟（使用者確認版面後）、Google Places 住宿/景點抓取（§9）
+- Phase 3 起：見 PLAN.md §9

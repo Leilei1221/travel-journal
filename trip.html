@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>旅程｜Lei's Go!</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Iansui&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/front.css">
+</head>
+<body>
+  <div class="container">
+
+    <header class="site-header">
+      <a class="brand" href="index.html">
+        <h1>Lei's Go! 🐾</h1>
+        <p>一個人的旅行日記</p>
+      </a>
+      <nav class="site-nav" aria-label="主導覽">
+        <a href="index.html">首頁</a>
+        <a href="index.html#trips">旅行紀錄</a>
+        <a href="index.html#about">關於我</a>
+        <a href="index.html#tips">旅行小貼士</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="trip-hero" aria-label="旅程封面">
+        <img id="trip-hero-img" alt="">
+        <div class="veil" aria-hidden="true"></div>
+        <div class="trip-hero-text">
+          <h2 id="trip-title">載入中…</h2>
+          <p id="trip-sub"></p>
+        </div>
+      </section>
+
+      <div class="trip-tabs" role="tablist" aria-label="旅程內容">
+        <button class="trip-tab" role="tab" data-panel="story" aria-selected="true">旅程故事</button>
+        <button class="trip-tab" role="tab" data-panel="plan" aria-selected="false">行程安排</button>
+        <button class="trip-tab" role="tab" data-panel="photos" aria-selected="false">旅途照片</button>
+        <button class="trip-tab" role="tab" data-panel="notes" aria-selected="false">旅行筆記</button>
+      </div>
+
+      <div id="panel-story" class="tab-panel" role="tabpanel"><p class="empty-note">翻頁中…</p></div>
+      <div id="panel-plan" class="tab-panel" role="tabpanel" hidden></div>
+      <div id="panel-photos" class="tab-panel" role="tabpanel" hidden></div>
+      <div id="panel-notes" class="tab-panel" role="tabpanel" hidden></div>
+    </main>
+
+    <footer class="site-footer">
+      © 2026 Lei's Go! · 一個人的旅行日記 · <a href="index.html">回到首頁</a>
+    </footer>
+  </div>
+
+  <script type="module" src="assets/js/trip.js"></script>
+</body>
+</html>

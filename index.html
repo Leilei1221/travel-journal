@@ -5,31 +5,90 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- 半公開：不進搜尋引擎、有連結可看（PLAN.md §4） -->
   <meta name="robots" content="noindex">
-  <title>旅遊手帳</title>
-  <style>
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      font-family: "PingFang TC", "Noto Sans TC", system-ui, sans-serif;
-      background: #faf6ee;
-      color: #3d3a34;
-    }
-    .note {
-      text-align: center;
-      padding: 2rem 3rem;
-      background: #fff;
-      border: 1px solid #ddd5c8;
-      border-radius: 12px;
-      box-shadow: 3px 3px 0 #ddd5c8;
-    }
-  </style>
+  <title>Lei's Go!｜一個人的旅行日記</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Iansui&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/front.css">
 </head>
 <body>
-  <div class="note">
-    <h1>🧳 旅遊手帳</h1>
-    <p>前臺整理中，Phase 2 上線。</p>
+  <div class="container">
+
+    <header class="site-header">
+      <a class="brand" href="index.html">
+        <h1>Lei's Go! 🐾</h1>
+        <p>一個人的旅行日記</p>
+      </a>
+      <nav class="site-nav" aria-label="主導覽">
+        <a href="index.html" aria-current="page">首頁</a>
+        <a href="#trips">旅行紀錄</a>
+        <a href="#about">關於我</a>
+        <a href="#tips">旅行小貼士</a>
+      </nav>
+    </header>
+
+    <section class="hero" aria-label="開場">
+      <div class="hero-copy">
+        <h2>旅行，<br>是與世界的對話，<br>也是與自己的和解。</h2>
+        <p>用腳步收藏風景，用心記錄感動，<br>這裡是我與世界的故事。</p>
+        <a class="btn-hand" href="#trips">開始我的旅程 🐾</a>
+      </div>
+      <div class="hero-photo">
+        <span class="tape tape-tl" aria-hidden="true"></span>
+        <span class="tape tape-tr" aria-hidden="true"></span>
+        <div class="photo-frame">
+          <img id="hero-img" alt="" width="900" height="600">
+        </div>
+      </div>
+    </section>
+
+    <section id="trips" aria-labelledby="trips-title">
+      <h2 class="section-title" id="trips-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 21c-4-4.5-7-8-7-11.5A7 7 0 0 1 12 3a7 7 0 0 1 7 6.5C19 13 16 16.5 12 21z"/><circle cx="12" cy="9.5" r="2.2"/></svg>
+        最新旅行紀錄
+      </h2>
+      <div id="trip-cards" class="polaroid-grid">
+        <p class="empty-note">翻開日記中…</p>
+      </div>
+    </section>
+
+    <section aria-label="更多內容">
+      <div class="feature-grid">
+        <div class="feature-card" id="about">
+          <h3>關於我</h3>
+          <span class="en">About Me</span>
+          <p>喜歡在路上觀察，用文字和影像記錄下來。一個人旅行不是孤單，是把整個世界都留給自己。希望你也能在這裡找到屬於你的旅行靈感。</p>
+        </div>
+        <div class="feature-card placeholder">
+          <h3>旅行地圖</h3>
+          <span class="en">Travel Map</span>
+          <p class="soon">探索世界的足跡地圖，繪製中… 🗺</p>
+        </div>
+        <div class="feature-card" id="tips">
+          <h3>旅行小貼士</h3>
+          <span class="en">Travel Tips</span>
+          <ul>
+            <li>行前準備：護照效期六個月以上、影本分開放</li>
+            <li>簽證事項：請留意各國的簽證規定，包括——
+              <ul>
+                <li>落地簽</li>
+                <li>免簽</li>
+                <li>有特定日期或天數限制的簽證</li>
+              </ul>
+            </li>
+            <li>省錢小技巧：機票分段買有時更划算（見各趟筆記）</li>
+            <li>打包心得：長邊留三分之一空間給戰利品</li>
+            <li>安全與注意事項：重要證件拍照存雲端</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      © 2026 Lei's Go! · 一個人的旅行日記
+    </footer>
   </div>
+
+  <script type="module" src="assets/js/home.js"></script>
 </body>
 </html>

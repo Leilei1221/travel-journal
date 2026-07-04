@@ -213,6 +213,16 @@
           <option value="MVR"><option value="JPY"><option value="EUR">
         </datalist>
         <label>臺幣約當（選填）<input type="number" name="amount_twd" step="0.01" min="0"></label>
+        <label>付款方式
+          <select name="payment_method">
+            <option value="">（未指定）</option>
+            <option>現金</option>
+            <option>信用卡</option>
+            <option>轉帳</option>
+            <option>行動支付</option>
+            <option>其他</option>
+          </select>
+        </label>
         <label class="full">關聯到（選填）
           <select name="link" id="expense-link"><option value="">（不關聯）</option></select>
         </label>

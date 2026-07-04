@@ -1,0 +1,323 @@
+/* 前臺共用樣式 — PLAN.md §7 風格憲章：像日記、不像設計稿
+   照片是主角；紙張/膠帶/手寫是註記層。主題色由 per-trip theme 覆寫 CSS 變數 */
+
+:root {
+  --main: #7a9e9f;
+  --accent: #e07a5f;
+  --paper: #faf6ee;
+  --ink: #3d3a34;
+  --ink-soft: #6b6557;   /* 弱化文字仍維持 4.5:1 對比 */
+  --line: #ddd5c8;
+  --card: #fffdf8;
+  --hand: 'Iansui', 'Noto Sans TC', cursive;
+  --body: 'Noto Sans TC', system-ui, sans-serif;
+}
+
+/* Iansui 只有 400 字重：手寫層一律正常字重，避免瀏覽器假加粗破壞手寫感 */
+.brand h1, .hero-copy h2, .section-title, .trip-hero h2, .post h3,
+.feature-card h3, .itinerary h3, .polaroid figcaption { font-weight: 400; }
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--ink);
+  background-color: var(--paper);
+  /* 手繪世界地圖＋航線浮水印、點陣暗紋（§7 質感基底） */
+  background-image:
+    url('../img/map-bg.svg'),
+    radial-gradient(rgba(61, 58, 52, 0.055) 1px, transparent 1px);
+  background-size: min(1300px, 170%) auto, 22px 22px;
+  background-position: center 90px, 0 0;
+  background-repeat: no-repeat, repeat;
+}
+
+img { max-width: 100%; display: block; }
+a { color: var(--main); }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.container { max-width: 1100px; margin: 0 auto; padding: 0 1.2rem; }
+
+/* ── 頁首 ─────────────────────────────────────────── */
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1.1rem 0;
+}
+.brand { text-decoration: none; color: var(--ink); }
+.brand h1 { font-family: var(--hand); font-size: 1.9rem; margin: 0; line-height: 1.1; }
+.brand p { margin: 0; font-size: .8rem; letter-spacing: .35em; color: var(--ink-soft); }
+.site-nav { display: flex; gap: .3rem; flex-wrap: wrap; }
+.site-nav a {
+  font-family: var(--hand);
+  text-decoration: none;
+  color: var(--ink);
+  padding: .5rem .8rem;   /* 觸控目標 ≥44px */
+  border-radius: 8px;
+}
+.site-nav a:hover, .site-nav a[aria-current="page"] { color: var(--accent); }
+.site-nav a[aria-current="page"] { border-bottom: 2px solid var(--accent); border-radius: 0; }
+
+/* ── 首頁 Hero ────────────────────────────────────── */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(260px, 5fr) 7fr;
+  gap: 2.5rem;
+  align-items: center;
+  padding: 2.5rem 0 3.5rem;
+}
+.hero-copy h2 {
+  font-family: var(--hand);
+  font-size: clamp(1.7rem, 4vw, 2.6rem);
+  line-height: 1.5;
+  margin: 0 0 1rem;
+}
+.hero-copy p { color: var(--ink-soft); margin: 0 0 1.8rem; }
+
+.btn-hand {
+  display: inline-block;
+  font-family: var(--hand);
+  font-size: 1.05rem;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  border-radius: 999px;
+  padding: .7rem 1.6rem;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 2px 3px 0 rgba(61, 58, 52, .25);
+  transition: transform .2s ease-out, box-shadow .2s ease-out;
+}
+.btn-hand:hover { transform: translateY(-2px); box-shadow: 2px 5px 0 rgba(61, 58, 52, .25); }
+
+/* 撕邊＋紙膠帶大圖（照片為主角） */
+.hero-photo { position: relative; }
+.hero-photo .photo-frame {
+  background: #fff;
+  padding: 12px;
+  border-radius: 4px;
+  box-shadow: 0 8px 24px rgba(61, 58, 52, .18);
+  transform: rotate(1.2deg);
+}
+.hero-photo img { aspect-ratio: 3 / 2; object-fit: cover; width: 100%; height: auto; border-radius: 2px; }
+
+/* 紙膠帶（註記層） */
+.tape {
+  position: absolute;
+  width: 110px;
+  height: 32px;
+  background: color-mix(in srgb, var(--main) 45%, #fff);
+  opacity: .75;
+  border-left: 2px dashed rgba(255, 255, 255, .6);
+  border-right: 2px dashed rgba(255, 255, 255, .6);
+  z-index: 2;
+}
+.tape-tl { top: -14px; left: 8%; transform: rotate(-8deg); }
+.tape-tr { top: -12px; right: 6%; transform: rotate(6deg); }
+
+/* ── 區塊標題（手寫＋小裝飾） ─────────────────────── */
+.section-title {
+  font-family: var(--hand);
+  font-size: 1.6rem;
+  margin: 0 0 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.section-title svg { width: 22px; height: 22px; stroke: var(--accent); flex-shrink: 0; }
+section { padding: 2.2rem 0; }
+
+/* ── 拍立得卡片 ───────────────────────────────────── */
+.polaroid-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 2rem 1.6rem;
+}
+.polaroid {
+  background: #fff;
+  padding: 10px 10px 14px;
+  border-radius: 3px;
+  box-shadow: 0 5px 16px rgba(61, 58, 52, .16);
+  text-decoration: none;
+  color: var(--ink);
+  transition: transform .25s ease-out, box-shadow .25s ease-out;
+}
+.polaroid:nth-child(3n+1) { transform: rotate(-1.8deg); }
+.polaroid:nth-child(3n+2) { transform: rotate(1.4deg); }
+.polaroid:nth-child(3n)   { transform: rotate(-.6deg); }
+.polaroid:hover { transform: rotate(0deg) translateY(-6px); box-shadow: 0 12px 26px rgba(61, 58, 52, .22); }
+.polaroid img { aspect-ratio: 4 / 3; object-fit: cover; width: 100%; background: var(--line); }
+.polaroid .photo-placeholder {
+  aspect-ratio: 4 / 3;
+  display: grid;
+  place-items: center;
+  font-family: var(--hand);
+  color: var(--ink-soft);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--main) 14%, #fff), color-mix(in srgb, var(--accent) 12%, #fff));
+}
+.hero.no-photo { grid-template-columns: 1fr; text-align: center; }
+.polaroid figcaption { font-family: var(--hand); text-align: center; padding: .7rem .3rem .2rem; line-height: 1.45; }
+.polaroid .place { font-size: 1.02rem; }
+.polaroid .meta { font-size: .82rem; color: var(--ink-soft); display: flex; justify-content: space-between; padding: 0 .2rem; }
+.polaroid .badge-plan {
+  display: inline-block;
+  font-size: .75rem;
+  background: color-mix(in srgb, var(--main) 18%, #fff);
+  color: var(--ink);
+  border-radius: 99px;
+  padding: 0 .55rem;
+  white-space: nowrap;
+}
+.polaroid .meta > span:last-child { flex-shrink: 0; }
+
+/* ── 功能區塊 ─────────────────────────────────────── */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1.4rem;
+}
+.feature-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 1.4rem 1.3rem;
+  box-shadow: 0 3px 10px rgba(61, 58, 52, .08);
+}
+.feature-card h3 { font-family: var(--hand); font-size: 1.25rem; margin: 0 0 .2rem; color: var(--accent); }
+.feature-card .en { font-family: var(--hand); font-size: .8rem; color: var(--ink-soft); letter-spacing: .12em; }
+.feature-card p, .feature-card li { font-size: .92rem; color: var(--ink); }
+.feature-card ul { padding-left: 1.1rem; margin: .6rem 0; }
+.feature-card.placeholder { opacity: .72; }
+.feature-card.placeholder .soon { font-family: var(--hand); color: var(--ink-soft); }
+
+/* ── 旅程內頁 Hero 橫幅 ───────────────────────────── */
+.trip-hero {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  min-height: 320px;
+  display: flex;
+  align-items: flex-end;
+  background: var(--main);
+  box-shadow: 0 8px 24px rgba(61, 58, 52, .2);
+}
+.trip-hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.trip-hero .veil {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, color-mix(in srgb, var(--main) 78%, #1c1a17) 0%, transparent 62%);
+}
+.trip-hero .trip-hero-text { position: relative; padding: 1.6rem 1.8rem; color: #fff; text-shadow: 0 1px 5px rgba(0,0,0,.45); }
+.trip-hero h2 { font-family: var(--hand); font-size: clamp(1.6rem, 4vw, 2.4rem); margin: 0 0 .3rem; }
+.trip-hero p { font-family: var(--hand); margin: 0; font-size: 1.02rem; }
+
+/* ── 頁籤 ─────────────────────────────────────────── */
+.trip-tabs { display: flex; gap: .4rem; flex-wrap: wrap; margin: 1.8rem 0 1.2rem; border-bottom: 2px solid var(--line); }
+.trip-tab {
+  font-family: var(--hand);
+  font-size: 1.05rem;
+  background: none;
+  border: none;
+  color: var(--ink-soft);
+  padding: .6rem 1rem;   /* ≥44px 觸控 */
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+}
+.trip-tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+.trip-tab:hover { color: var(--accent); }
+
+/* ── 內頁卡片（行程安排） ─────────────────────────── */
+.itinerary h3 { font-family: var(--hand); font-size: 1.3rem; margin: 1.8rem 0 .8rem; color: var(--main); filter: brightness(.82); }
+.item-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--main);
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  margin-bottom: .9rem;
+  box-shadow: 0 2px 8px rgba(61, 58, 52, .07);
+}
+.item-card strong { font-size: 1.02rem; }
+.item-card .sub { color: var(--ink-soft); font-size: .9rem; }
+.item-card .chip {
+  display: inline-block;
+  font-size: .78rem;
+  background: color-mix(in srgb, var(--main) 16%, #fff);
+  border-radius: 99px;
+  padding: .05rem .6rem;
+  margin-right: .3rem;
+}
+/* 交通卡片＝醒目資訊框 */
+.item-card.callout {
+  border-left-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 7%, var(--card));
+}
+.maps-link {
+  display: inline-block;
+  font-family: var(--hand);
+  font-size: .92rem;
+  color: var(--ink);
+  background: #fff;
+  border: 1.5px solid var(--main);
+  border-radius: 999px;
+  padding: .35rem .9rem;
+  text-decoration: none;
+  margin-top: .5rem;
+}
+.maps-link:hover { background: color-mix(in srgb, var(--main) 12%, #fff); }
+
+/* ── 文章（旅程故事/筆記） ────────────────────────── */
+.post {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1.4rem 1.6rem;
+  margin-bottom: 1.2rem;
+  box-shadow: 0 3px 10px rgba(61, 58, 52, .07);
+}
+.post h3 { font-family: var(--hand); margin: 0 0 .2rem; font-size: 1.3rem; }
+.post .post-date { font-family: var(--hand); color: var(--ink-soft); font-size: .88rem; }
+.post .post-body { margin-top: .8rem; max-width: 68ch; }
+
+/* 空狀態（手寫） */
+.empty-note {
+  font-family: var(--hand);
+  color: var(--ink-soft);
+  text-align: center;
+  padding: 3rem 1rem;
+  font-size: 1.1rem;
+}
+
+/* ── 頁尾 ─────────────────────────────────────────── */
+.site-footer {
+  text-align: center;
+  font-family: var(--hand);
+  color: var(--ink-soft);
+  font-size: .88rem;
+  padding: 2.5rem 1rem 2rem;
+  border-top: 1px dashed var(--line);
+  margin-top: 2rem;
+}
+
+/* ── 響應式 ───────────────────────────────────────── */
+@media (max-width: 768px) {
+  .hero { grid-template-columns: 1fr; gap: 1.8rem; padding: 1.5rem 0 2.2rem; }
+  .hero-photo { order: -1; }
+  .polaroid-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1.4rem 1rem; }
+  .trip-hero { min-height: 230px; border-radius: 12px; }
+}
+
+/* 動態偏好：減少動態時停用傾斜與位移 */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .polaroid, .btn-hand { transition: none; }
+  .polaroid:hover { transform: none; }
+}

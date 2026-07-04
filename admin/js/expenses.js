@@ -58,6 +58,7 @@ async function loadList() {
           ${x.amount_twd != null ? `<span class="muted">≈ NT$ ${Number(x.amount_twd).toLocaleString()}</span>` : ''}
           <div class="muted">
             ${esc(x.spent_on ?? '')}
+            ${x.payment_method ? `｜${esc(x.payment_method)}` : ''}
             ${linkedLabel(x) ? `｜${esc(linkedLabel(x))}` : ''}
             ${x.note ? `｜${esc(x.note)}` : ''}
           </div>
@@ -100,6 +101,7 @@ function fillForm(x) {
   f.elements.amount.value = x.amount;
   f.elements.currency.value = x.currency;
   f.elements.amount_twd.value = x.amount_twd ?? '';
+  f.elements.payment_method.value = x.payment_method ?? '';
   f.elements.spent_on.value = x.spent_on ?? '';
   f.elements.link.value =
     x.stay_id ? `stay:${x.stay_id}`
@@ -125,6 +127,7 @@ async function saveExpense(e) {
     amount: Number(f.elements.amount.value),
     currency: f.elements.currency.value.trim().toUpperCase() || 'TWD',
     amount_twd: f.elements.amount_twd.value === '' ? null : Number(f.elements.amount_twd.value),
+    payment_method: f.elements.payment_method.value || null,
     spent_on: f.elements.spent_on.value || null,
     stay_id: kind === 'stay' ? linkId : null,
     flight_id: kind === 'flight' ? linkId : null,
