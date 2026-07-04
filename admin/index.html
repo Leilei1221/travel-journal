@@ -307,6 +307,20 @@
       <p class="muted">「行前情報」與「每日遊記」顯示於前臺<b>旅程故事</b>頁籤；「旅程總結」顯示於<b>旅行筆記</b>頁籤。只有「已發布」的文章對外可見，草稿只有你看得到。</p>
       <div id="post-list" class="list"></div>
 
+      <h2>✨ AI 草稿助手</h2>
+      <div class="form-grid ai-box">
+        <label class="full">素材（口述重點；「歷史行程回填」時把舊行程的雜記/航班/住宿/照片說明整段貼進來）
+          <textarea id="ai-notes" rows="8" placeholder="例：Day 2 早上出海浮潛看到海龜，下午在水上屋發呆，晚餐 buffet 的現煎鮪魚排超好吃…"></textarea>
+        </label>
+        <label class="checkbox full"><input type="checkbox" id="ai-include-context" checked>自動附上此旅程的航班/住宿/交通/照片紀錄當背景資料</label>
+        <div class="full form-actions">
+          <button type="button" id="ai-journal-btn">✨ 產生遊記草稿</button>
+          <button type="button" id="ai-backfill-btn">🗂 歷史行程回填</button>
+          <span id="ai-status" class="muted"></span>
+        </div>
+        <p class="muted full">產生的內容會填入下方文章表單並設為「草稿」——請人工確認、潤飾後再儲存/發布（AI 絕不直接發布）。</p>
+      </div>
+
       <h2 id="post-form-title">新增文章</h2>
       <form id="post-form" class="form-grid">
         <label>類型
@@ -330,6 +344,21 @@
           <button type="button" id="post-form-reset">清空/取消編輯</button>
         </div>
       </form>
+
+      <h2>📣 FB 貼文產生器</h2>
+      <div class="form-grid ai-box">
+        <label class="full">素材（貼上要宣傳的文章內容或重點，會自動附上這趟旅程的前臺連結）
+          <textarea id="ai-fb-notes" rows="5"></textarea>
+        </label>
+        <div class="full form-actions">
+          <button type="button" id="ai-fb-btn">📣 產生 FB 貼文</button>
+          <button type="button" id="ai-fb-copy">複製結果</button>
+          <span id="ai-fb-status" class="muted"></span>
+        </div>
+        <label class="full">結果（確認後自行複製貼到粉專發文）
+          <textarea id="ai-fb-result" rows="8"></textarea>
+        </label>
+      </div>
     </main>
   </section>
 
@@ -342,6 +371,7 @@
     import { initExpenses, loadExpenses } from './js/expenses.js';
     import { initPhotos, loadPhotos } from './js/photos.js';
     import { initPosts, loadPosts } from './js/posts.js';
+    import { initAi, loadAi } from './js/ai.js';
 
     const loginView = document.getElementById('login-view');
     const appView = document.getElementById('app-view');
@@ -354,7 +384,7 @@
       transport: () => loadTransport(currentTrip),
       expenses: () => loadExpenses(currentTrip),
       photos: () => loadPhotos(currentTrip),
-      posts: () => loadPosts(currentTrip),
+      posts: () => { loadPosts(currentTrip); loadAi(currentTrip); },
     };
 
     // 頁籤切換
@@ -381,6 +411,7 @@
     initExpenses();
     initPhotos();
     initPosts();
+    initAi();
 
     initAuth({
       onLogin() {

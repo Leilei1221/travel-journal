@@ -8,6 +8,11 @@ const TYPE_HINT = { pretrip: '→ 前臺「旅程故事」', daily: '→ 前臺�
 let tripId = null;
 let editingId = null;
 let editingPublishedAt = null;
+let pendingAiDraft = null; // AI 產生的原文，儲存時寫入 ai_draft 供日後對照
+
+export function setPendingAiDraft(text) {
+  pendingAiDraft = text;
+}
 
 export function initPosts() {
   document.getElementById('post-form').addEventListener('submit', savePost);
@@ -69,6 +74,7 @@ function fillForm(p) {
 function resetForm() {
   editingId = null;
   editingPublishedAt = null;
+  pendingAiDraft = null;
   document.getElementById('post-form').reset();
   document.getElementById('post-form-title').textContent = '新增文章';
 }
@@ -86,6 +92,7 @@ async function savePost(e) {
     content: f.elements.content.value.trim() || null,
     // 首次發布時記錄發布時間；下架回草稿則清除
     published_at: status === 'published' ? (editingPublishedAt ?? new Date().toISOString()) : null,
+    ...(pendingAiDraft ? { ai_draft: pendingAiDraft } : {}),
   };
   const q = editingId
     ? supabase.from('posts').update(row).eq('id', editingId)
