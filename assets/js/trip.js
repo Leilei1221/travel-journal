@@ -175,11 +175,21 @@ async function loadPlan() {
     : '<p class="empty-note">行程還在規劃中…</p>';
 }
 
+// 打卡位置連結：有 GPS 座標用座標精準定位，否則用名稱搜尋
+function photoLocation(p) {
+  const hasCoords = p.lat != null && p.lng != null;
+  if (!hasCoords && !p.location_name) return '';
+  const url = hasCoords
+    ? `https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}`
+    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.location_name)}`;
+  return `<a class="photo-loc" href="${esc(url)}" target="_blank" rel="noopener">📍 ${esc(p.location_name ?? '打卡點')}</a>`;
+}
+
 async function loadPhotos() {
   const el = document.getElementById('panel-photos');
   const { data } = await supabase
     .from('photos')
-    .select('src_url, caption, taken_on')
+    .select('src_url, caption, taken_on, location_name, lat, lng')
     .eq('trip_id', tripId)
     .order('taken_on', { nullsFirst: false })
     .order('sort_order');
@@ -189,7 +199,7 @@ async function loadPhotos() {
           <img src="${esc(p.src_url)}" alt="${esc(p.caption ?? '旅行照片')}" loading="lazy">
           <figcaption>
             <div class="place">${esc(p.caption ?? '')}</div>
-            <div class="meta"><span></span><span>${esc(p.taken_on?.replaceAll('-', '.') ?? '')}</span></div>
+            <div class="meta"><span>${photoLocation(p)}</span><span>${esc(p.taken_on?.replaceAll('-', '.') ?? '')}</span></div>
           </figcaption>
         </figure>`).join('')}</div>`
     : '<p class="empty-note">照片還在沖洗中…📷</p>';

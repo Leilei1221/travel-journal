@@ -137,6 +137,8 @@ textarea { min-height: 7.5rem; resize: vertical; line-height: 1.6; }
 }
 .photo-actions { display: flex; gap: .3rem; flex-shrink: 0; }
 .photo-actions button { padding: .2rem .6rem; font-size: .8rem; }
+.checkin-row { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+.checkin-row .checkin-clear { background: #fff; color: var(--ink); border-color: var(--line); font-size: .8rem; }
 input[type="color"] { padding: 0; height: 2.2rem; width: 4rem; }
 
 fieldset { border: 1px dashed var(--line); border-radius: 8px; display: grid; gap: .8rem; }

@@ -13,6 +13,33 @@ export function initPhotos() {
   document.getElementById('photo-form').addEventListener('submit', uploadPhotos);
   document.getElementById('photo-edit-form').addEventListener('submit', saveEdit);
   document.getElementById('photo-edit-cancel').addEventListener('click', cancelEdit);
+  wireCheckin(document.getElementById('photo-form'));
+  wireCheckin(document.getElementById('photo-edit-form'));
+}
+
+// ── GPS 打卡（旅途中隨手記美食/景點位置） ─────────────
+function setCheckin(form, lat, lng) {
+  form.elements.lat.value = lat ?? '';
+  form.elements.lng.value = lng ?? '';
+  const has = lat != null && lat !== '';
+  form.querySelector('.checkin-status').textContent = has
+    ? `已定位（${Number(lat).toFixed(5)}, ${Number(lng).toFixed(5)}）`
+    : '未定位';
+  form.querySelector('.checkin-clear').hidden = !has;
+}
+
+function wireCheckin(form) {
+  form.querySelector('.checkin-btn').addEventListener('click', () => {
+    const status = form.querySelector('.checkin-status');
+    if (!navigator.geolocation) { status.textContent = '此裝置不支援定位'; return; }
+    status.textContent = '定位中…';
+    navigator.geolocation.getCurrentPosition(
+      pos => setCheckin(form, pos.coords.latitude, pos.coords.longitude),
+      err => { status.textContent = '定位失敗：' + (err.code === 1 ? '未授權定位權限' : err.message); },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  });
+  form.querySelector('.checkin-clear').addEventListener('click', () => setCheckin(form, null, null));
 }
 
 export async function loadPhotos(trip) {
@@ -48,6 +75,7 @@ async function loadList() {
         <figcaption>
           <span>
             ${p.stays ? `<span class="badge">🏨 ${esc(p.stays.name)}</span> ` : ''}
+            ${p.location_name || p.lat != null ? `<span class="badge">📍 ${esc(p.location_name ?? 'GPS')}</span> ` : ''}
             ${esc(p.taken_on ?? '')} ${esc(p.caption ?? '')}
           </span>
           <span class="photo-actions">
@@ -96,6 +124,9 @@ async function uploadPhotos(e) {
   const takenOn = f.elements.taken_on.value || null;
   const caption = f.elements.caption.value.trim() || null;
   const stayId = f.elements.photo_stay.value || null;
+  const locationName = f.elements.location_name.value.trim() || null;
+  const lat = f.elements.lat.value === '' ? null : Number(f.elements.lat.value);
+  const lng = f.elements.lng.value === '' ? null : Number(f.elements.lng.value);
   const progressEl = document.getElementById('photo-progress');
   const btn = f.querySelector('button[type=submit]');
   btn.disabled = true;
@@ -118,6 +149,9 @@ async function uploadPhotos(e) {
         storage_path: path,
         caption,
         stay_id: stayId,
+        location_name: locationName,
+        lat,
+        lng,
         sort_order: done,
       });
       if (dbError) throw dbError;
@@ -144,6 +178,8 @@ function startEdit(p) {
   f.elements.caption.value = p.caption ?? '';
   f.elements.taken_on.value = p.taken_on ?? '';
   f.elements.photo_stay.value = p.stay_id ?? '';
+  f.elements.location_name.value = p.location_name ?? '';
+  setCheckin(f, p.lat, p.lng);
   box.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
@@ -161,6 +197,9 @@ async function saveEdit(e) {
     caption: f.elements.caption.value.trim() || null,
     taken_on: f.elements.taken_on.value || null,
     stay_id: f.elements.photo_stay.value || null,
+    location_name: f.elements.location_name.value.trim() || null,
+    lat: f.elements.lat.value === '' ? null : Number(f.elements.lat.value),
+    lng: f.elements.lng.value === '' ? null : Number(f.elements.lng.value),
   }).eq('id', editingId);
   if (error) { toast('儲存失敗：' + error.message, true); return; }
   toast('照片資訊已更新');

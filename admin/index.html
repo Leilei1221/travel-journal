@@ -261,6 +261,13 @@
         <label>關聯住宿（住宿介紹照片）
           <select name="photo_stay"><option value="">（一般照片，不關聯）</option></select>
         </label>
+        <label>打卡位置（美食記/景點）<input name="location_name" placeholder="例：巷口豆花店"></label>
+        <div class="full checkin-row">
+          <button type="button" class="checkin-btn">📍 用目前位置打卡（GPS）</button>
+          <span class="checkin-status muted">未定位</span>
+          <button type="button" class="checkin-clear" hidden>清除定位</button>
+          <input type="hidden" name="lat"><input type="hidden" name="lng">
+        </div>
         <div class="full form-actions">
           <button type="submit">壓縮並上傳</button>
           <span id="photo-progress" class="muted"></span>
@@ -276,6 +283,13 @@
           <label>關聯住宿
             <select name="photo_stay"><option value="">（一般照片，不關聯）</option></select>
           </label>
+          <label>打卡位置<input name="location_name" placeholder="例：巷口豆花店"></label>
+          <div class="full checkin-row">
+            <button type="button" class="checkin-btn">📍 用目前位置打卡（GPS）</button>
+            <span class="checkin-status muted">未定位</span>
+            <button type="button" class="checkin-clear" hidden>清除定位</button>
+            <input type="hidden" name="lat"><input type="hidden" name="lng">
+          </div>
           <div class="full form-actions">
             <button type="submit">儲存變更</button>
             <button type="button" id="photo-edit-cancel">取消</button>
