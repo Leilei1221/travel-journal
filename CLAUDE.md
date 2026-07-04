@@ -11,7 +11,8 @@
   - ⚠️ 同帳號下另一個專案「Leilei1221's Project」是奶貓日記，**不要動它**
 - Schema 鏡像：`supabase/migrations/`（線上資料庫為真相來源；改 schema 時用 MCP `apply_migration` 並同步新增鏡像檔）
 - 照片 bucket：`photos`（公開讀取、登入者寫入）
-- Keep-alive：`.github/workflows/keep-alive.yml` 每 3 天 ping REST API（需設 repo secrets `SUPABASE_URL`、`SUPABASE_ANON_KEY`）
+- Keep-alive：`.github/workflows/keep-alive.yml` 每 3 天 ping REST API（repo secrets `SUPABASE_URL`、`SUPABASE_ANON_KEY` 已設定）
+- 前臺網址：https://leilei1221.github.io/travel-journal/ （GitHub Pages，main 分支根目錄，push 即自動部署）
 
 ## 目錄結構
 
@@ -34,5 +35,6 @@
 - Phase 1：✅ 建表＋RLS ✅ 後臺登入 ✅ 航班/住宿/交通卡片手動輸入 ✅ 照片上傳（前端壓縮）✅ GitHub repo＋keep-alive
   - 追加：✅ 住宿卡 Google Maps 連結（place_id 定位/名稱地址搜尋）✅ 住宿依入住日排序 ✅ 記帳（expenses，僅本人可見）✅ 航班轉乘方式/票種/航司下拉 ✅ 記帳付款方式
 - Phase 2（本階段）：✅ 前臺首頁（Hero＋拍立得卡片＋關於我/小貼士；旅行地圖佔位）✅ 旅程內頁（主題色＋四頁籤，行程安排含 Maps 按鈕）✅ 手繪插畫背景＋遮罩變數 ✅ 住宿/航班公開時機控制（RLS 層，行程安全）
-  - 待辦：GitHub Pages 開啟（使用者確認版面後）、Google Places 住宿/景點抓取（§9）
+  - ✅ GitHub Pages 上線（2026-07-04）
+  - 待辦：Google Places 住宿/景點抓取（§9）
 - Phase 3 起：見 PLAN.md §9
