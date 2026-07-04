@@ -119,6 +119,7 @@ export async function loadTrips(selectedId = null) {
           <div class="muted">${esc(t.destination ?? '')}　${esc(t.start_date ?? '?')} ～ ${esc(t.end_date ?? '?')}</div>
         </div>
         <div class="card-actions">
+          <a class="btn-link" href="../book.html?id=${t.id}" target="_blank" rel="noopener">📖 小書</a>
           <button data-action="select">選取</button>
           <button data-action="edit">編輯</button>
         </div>

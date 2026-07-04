@@ -139,6 +139,18 @@ textarea { min-height: 7.5rem; resize: vertical; line-height: 1.6; }
 .photo-actions button { padding: .2rem .6rem; font-size: .8rem; }
 .ai-box { border: 1.5px dashed var(--accent); background: #fdf6f0; }
 
+a.btn-link {
+  display: inline-block;
+  padding: .35rem .8rem;
+  border: 1px solid var(--main);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--main);
+  text-decoration: none;
+  font-size: .85rem;
+}
+a.btn-link:hover { background: var(--paper); }
+
 .checkin-row { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
 .checkin-row .checkin-clear { background: #fff; color: var(--ink); border-color: var(--line); font-size: .8rem; }
 input[type="color"] { padding: 0; height: 2.2rem; width: 4rem; }

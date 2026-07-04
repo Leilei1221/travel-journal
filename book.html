@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>旅遊小書｜Lei's Go!</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Iansui&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/book.css">
+</head>
+<body>
+
+  <!-- 工具列（列印時隱藏） -->
+  <div class="toolbar">
+    <div>
+      <strong>📖 A5 旅遊小書</strong>
+      <span id="book-status" class="toolbar-note">載入中…</span>
+    </div>
+    <div class="toolbar-note">
+      每頁 A5＋3mm 出血（154×216mm）。按「匯出 PDF」→ 選「另存為 PDF」、
+      邊界「無」、勾選「背景圖形」→ 可自印或直接送印刷廠。
+    </div>
+    <button id="print-btn">🖨 匯出 PDF</button>
+  </div>
+
+  <main id="book"></main>
+
+  <script type="module" src="assets/js/book.js"></script>
+</body>
+</html>

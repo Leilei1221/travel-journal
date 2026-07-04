@@ -40,4 +40,11 @@
   - 追加：✅ 照片打卡位置（location_name＋GPS 座標，後臺「用目前位置打卡」；前臺照片牆 📍 Maps 連結）
   - 待辦：Google Places 住宿/景點抓取（§9）
 - Phase 3：✅ Edge Function `gemini-draft`（金鑰只在函式環境變數、驗證登入、鏡像檔 `supabase/functions/gemini-draft/index.ts`）✅ AI 遊記草稿＋歷史行程回填（後臺文章頁籤「AI 草稿助手」，產出填入表單為草稿、原文存 ai_draft）✅ FB 貼文產生器（自動附前臺連結，複製貼上發文）✅ 旅程專屬背景插畫（mode: background 用 gemini-2.5-flash-image 依目的地＋主題色生成；後臺旅程編輯「生成→預覽→套用」，存 Storage backgrounds/{tripId}.webp＋trips.bg_image_url；前臺以 --bg-image CSS 變數覆寫，未設定用預設 bg-doodle）
-- Phase 4 起：見 PLAN.md §9（航班狀態查詢、Gmail 異動信解析、A5 PDF 小書）
+- Phase 4（本階段）：✅ 航班狀態查詢（後臺航班卡「查航班狀態」開 Google 即時航班資訊，零 API 費用）✅ A5 PDF 小書（`book.html?id=`＋book.css/book.js：154×216mm 含 3mm 出血、封面/行程/遊記/照片牆 2×2/封底、段落級自動分頁；後臺旅程卡「📖 小書」開啟，瀏覽器「另存為 PDF、邊界無、含背景圖形」匯出）✅ Gmail 異動信解析流程（見下）
+
+## Gmail 航班異動信解析（Phase 4 操作程序，非程式碼）
+
+出發前 1–3 天，使用者對 Claude 說「**幫我掃描航空公司異動通知信**」即可。流程（依 PLAN.md §5 半自動決策）：
+1. 用 Gmail 連接器搜尋近期來自航空公司（訂票平臺）的信件：關鍵字如 schedule change、時間變更、flight change、航班號
+2. 比對信中航班資訊與 `flights` 表現有起降時間
+3. **列出差異、經使用者確認後**，才以 MCP 更新 flights 資料（絕不自動改）

@@ -51,6 +51,8 @@ export async function loadFlights(trip) {
           ${fl.flight_private?.booking_ref ? `<div class="private-field">🔒 訂位代號：${esc(fl.flight_private.booking_ref)}</div>` : ''}
         </div>
         <div class="card-actions">
+          ${fl.flight_no ? `<a class="btn-link" target="_blank" rel="noopener"
+            href="https://www.google.com/search?q=${encodeURIComponent(`${fl.airline ?? ''} ${fl.flight_no} 航班狀態`.trim())}">✈ 查航班狀態</a>` : ''}
           <button data-action="edit">編輯</button>
           <button data-action="delete" class="danger">刪除</button>
         </div>
