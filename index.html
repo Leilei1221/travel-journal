@@ -59,10 +59,13 @@
           <span class="en">About Me</span>
           <p>喜歡在路上觀察，用文字和影像記錄下來。一個人旅行不是孤單，是把整個世界都留給自己。希望你也能在這裡找到屬於你的旅行靈感。</p>
         </div>
-        <div class="feature-card placeholder">
+        <div class="feature-card" id="map-card">
           <h3>旅行地圖</h3>
           <span class="en">Travel Map</span>
-          <p class="soon">探索世界的足跡地圖，繪製中… 🗺</p>
+          <button type="button" class="map-thumb-btn" id="open-map" aria-haspopup="dialog">
+            <img src="assets/img/travel-map.webp" alt="Lei 的旅行足跡地圖" width="1536" height="1024" loading="lazy">
+          </button>
+          <p class="muted map-hint">點擊放大檢視（手機可雙指縮放）</p>
         </div>
         <div class="feature-card" id="tips">
           <h3>旅行小貼士</h3>
@@ -87,6 +90,14 @@
     <footer class="site-footer">
       © 2026 Lei's Go! · 旅行日記
     </footer>
+  </div>
+
+  <!-- 旅行地圖燈箱 -->
+  <div id="map-lightbox" class="lightbox" hidden role="dialog" aria-modal="true" aria-label="Lei 的旅行足跡地圖（放大檢視）">
+    <button type="button" class="lightbox-close" id="map-close" aria-label="關閉地圖">✕</button>
+    <div class="lightbox-stage" id="map-stage">
+      <img id="map-full" src="assets/img/travel-map.webp" alt="Lei 的旅行足跡地圖" draggable="false">
+    </div>
   </div>
 
   <script type="module" src="assets/js/home.js"></script>

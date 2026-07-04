@@ -125,6 +125,18 @@ input, select, textarea {
   border-radius: 6px;
   background: #fffdf8;
 }
+/* 編輯框拉高（不拉寬），可再手動往下拖 */
+textarea { min-height: 7.5rem; resize: vertical; line-height: 1.6; }
+#post-form textarea { min-height: 18rem; }
+
+.edit-preview {
+  grid-column: 1 / -1;
+  max-width: 260px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+.photo-actions { display: flex; gap: .3rem; flex-shrink: 0; }
+.photo-actions button { padding: .2rem .6rem; font-size: .8rem; }
 input[type="color"] { padding: 0; height: 2.2rem; width: 4rem; }
 
 fieldset { border: 1px dashed var(--line); border-radius: 8px; display: grid; gap: .8rem; }

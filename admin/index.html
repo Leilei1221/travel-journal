@@ -40,6 +40,7 @@
       <button class="tab" data-tab="transport" disabled>交通卡片</button>
       <button class="tab" data-tab="expenses" disabled>記帳</button>
       <button class="tab" data-tab="photos" disabled>照片</button>
+      <button class="tab" data-tab="posts" disabled>文章</button>
     </nav>
 
     <!-- 旅程 -->
@@ -125,7 +126,7 @@
           </select>
         </label>
         <label class="full">轉機資訊<input name="layover_info" placeholder="例：BKK 轉機 2h35m"></label>
-        <label class="full">備註<textarea name="notes" rows="2"></textarea></label>
+        <label class="full">備註<textarea name="notes" rows="5"></textarea></label>
         <fieldset class="full private-fieldset">
           <legend>🔒 私人欄位（僅本人可見，前臺永不顯示）</legend>
           <label>訂位代號<input name="booking_ref"></label>
@@ -157,7 +158,7 @@
             <option value="hidden">永不公開</option>
           </select>
         </label>
-        <label class="full">備註<textarea name="notes" rows="2"></textarea></label>
+        <label class="full">備註<textarea name="notes" rows="5"></textarea></label>
         <fieldset class="full private-fieldset">
           <legend>🔒 私人欄位（僅本人可見，前臺永不顯示）</legend>
           <label>訂單編號<input name="order_no"></label>
@@ -190,7 +191,7 @@
         </label>
         <label>標題 *<input name="title" required placeholder="例：機場→碼頭 快艇接駁"></label>
         <label>排序<input type="number" name="sort_order" value="0"></label>
-        <label class="full">內容<textarea name="content" rows="3" placeholder="對讀者最有價值的交通經驗，前臺會以醒目資訊框呈現"></textarea></label>
+        <label class="full">內容<textarea name="content" rows="7" placeholder="對讀者最有價值的交通經驗，前臺會以醒目資訊框呈現"></textarea></label>
         <label class="full">費用參考<input name="cost_note" placeholder="例：USD 50/人 來回"></label>
         <div class="full form-actions">
           <button type="submit">儲存卡片</button>
@@ -257,14 +258,64 @@
         </label>
         <label>拍攝日期<input type="date" name="taken_on"></label>
         <label>說明<input name="caption" placeholder="套用到這批照片"></label>
+        <label>關聯住宿（住宿介紹照片）
+          <select name="photo_stay"><option value="">（一般照片，不關聯）</option></select>
+        </label>
         <div class="full form-actions">
           <button type="submit">壓縮並上傳</button>
           <span id="photo-progress" class="muted"></span>
         </div>
       </form>
 
+      <div id="photo-edit-box" hidden>
+        <h2>編輯照片資訊</h2>
+        <form id="photo-edit-form" class="form-grid">
+          <img id="photo-edit-preview" class="edit-preview" alt="編輯中的照片">
+          <label class="full">說明文字<input name="caption" placeholder="可留白"></label>
+          <label>拍攝日期<input type="date" name="taken_on"></label>
+          <label>關聯住宿
+            <select name="photo_stay"><option value="">（一般照片，不關聯）</option></select>
+          </label>
+          <div class="full form-actions">
+            <button type="submit">儲存變更</button>
+            <button type="button" id="photo-edit-cancel">取消</button>
+          </div>
+        </form>
+      </div>
+
       <h2>照片牆</h2>
       <div id="photo-list" class="photo-grid"></div>
+    </main>
+
+    <!-- 文章（旅程故事/旅行筆記） -->
+    <main id="tab-posts" class="tab-panel" hidden>
+      <h2>文章</h2>
+      <p class="muted">「行前情報」與「每日遊記」顯示於前臺<b>旅程故事</b>頁籤；「旅程總結」顯示於<b>旅行筆記</b>頁籤。只有「已發布」的文章對外可見，草稿只有你看得到。</p>
+      <div id="post-list" class="list"></div>
+
+      <h2 id="post-form-title">新增文章</h2>
+      <form id="post-form" class="form-grid">
+        <label>類型
+          <select name="post_type">
+            <option value="pretrip">行前情報（→ 旅程故事）</option>
+            <option value="daily">每日遊記（→ 旅程故事）</option>
+            <option value="summary">旅程總結（→ 旅行筆記）</option>
+          </select>
+        </label>
+        <label>日期<input type="date" name="post_date"></label>
+        <label>狀態
+          <select name="status">
+            <option value="draft">草稿（不公開）</option>
+            <option value="published">發布</option>
+          </select>
+        </label>
+        <label class="full">標題<input name="title" placeholder="例：Day 1 抵達馬累"></label>
+        <label class="full">內容<textarea name="content" rows="14" placeholder="空一行分段。之後 Phase 3 會加入 AI 草稿協助。"></textarea></label>
+        <div class="full form-actions">
+          <button type="submit">儲存</button>
+          <button type="button" id="post-form-reset">清空/取消編輯</button>
+        </div>
+      </form>
     </main>
   </section>
 
@@ -276,6 +327,7 @@
     import { initTransport, loadTransport } from './js/transport.js';
     import { initExpenses, loadExpenses } from './js/expenses.js';
     import { initPhotos, loadPhotos } from './js/photos.js';
+    import { initPosts, loadPosts } from './js/posts.js';
 
     const loginView = document.getElementById('login-view');
     const appView = document.getElementById('app-view');
@@ -288,6 +340,7 @@
       transport: () => loadTransport(currentTrip),
       expenses: () => loadExpenses(currentTrip),
       photos: () => loadPhotos(currentTrip),
+      posts: () => loadPosts(currentTrip),
     };
 
     // 頁籤切換
@@ -313,6 +366,7 @@
     initTransport();
     initExpenses();
     initPhotos();
+    initPosts();
 
     initAuth({
       onLogin() {

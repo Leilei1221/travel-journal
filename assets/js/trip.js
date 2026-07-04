@@ -98,17 +98,35 @@ function renderPosts(el, posts, emptyText) {
 
 async function loadPlan() {
   const el = document.getElementById('panel-plan');
-  const [flights, stays, cards] = await Promise.all([
+  const [flights, stays, cards, stayPhotos] = await Promise.all([
     supabase.from('flights')
       .select('segment_order, airline, flight_no, depart_airport, arrive_airport, depart_time, arrive_time, layover_info, transfer_type, ticket_type, notes')
       .eq('trip_id', tripId).order('segment_order'),
     supabase.from('stays')
-      .select('name, google_place_id, address, check_in, check_out, notes')
+      .select('id, name, google_place_id, address, check_in, check_out, notes')
       .eq('trip_id', tripId).order('check_in', { nullsFirst: false }).order('created_at'),
     supabase.from('transport_cards')
       .select('card_type, title, content, cost_note')
       .eq('trip_id', tripId).order('sort_order'),
+    // 住宿介紹照片（RLS 已確保只回傳「該住宿已公開」的照片）
+    supabase.from('photos')
+      .select('src_url, caption, stay_id')
+      .eq('trip_id', tripId).not('stay_id', 'is', null).order('sort_order'),
   ]);
+
+  const photosByStay = {};
+  for (const p of stayPhotos.data ?? []) {
+    (photosByStay[p.stay_id] ??= []).push(p);
+  }
+  const stayGallery = stayId => {
+    const list = photosByStay[stayId];
+    if (!list?.length) return '';
+    return `<div class="stay-photos">${list.map(p => `
+      <figure>
+        <img src="${esc(p.src_url)}" alt="${esc(p.caption ?? '住宿照片')}" loading="lazy">
+        ${p.caption ? `<figcaption>${esc(p.caption)}</figcaption>` : ''}
+      </figure>`).join('')}</div>`;
+  };
 
   const fmtTime = iso => {
     if (!iso) return '';
@@ -138,6 +156,7 @@ async function loadPlan() {
         <div class="sub">${esc(s.check_in ?? '')} 入住 – ${esc(s.check_out ?? '')} 退房</div>
         ${s.address ? `<div class="sub">${esc(s.address)}</div>` : ''}
         ${s.notes ? `<div class="sub">${esc(s.notes)}</div>` : ''}
+        ${stayGallery(s.id)}
         <a class="maps-link" href="${esc(mapsUrl(s))}" target="_blank" rel="noopener">🗺 在 Google Maps 開啟</a>
       </div>`).join('')}` : '';
 

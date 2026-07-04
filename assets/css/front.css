@@ -211,6 +211,71 @@ section { padding: 2.2rem 0; }
 .feature-card.placeholder { opacity: .72; }
 .feature-card.placeholder .soon { font-family: var(--hand); color: var(--ink-soft); }
 
+/* ── 旅行地圖卡＋燈箱 ─────────────────────────────── */
+.map-thumb-btn {
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin-top: .6rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  background: none;
+  cursor: zoom-in;
+}
+.map-thumb-btn img { width: 100%; height: auto; display: block; transition: transform .25s ease-out; }
+.map-thumb-btn:hover img { transform: scale(1.03); }
+.map-hint { font-size: .8rem; margin: .5rem 0 0; }
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(30, 27, 22, .82);
+}
+.lightbox-stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  touch-action: none;  /* 手勢交給 JS：雙指縮放、拖曳平移 */
+  cursor: grab;
+}
+.lightbox-stage.dragging { cursor: grabbing; }
+.lightbox-stage img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  max-width: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.lightbox-close {
+  position: absolute;
+  top: max(.8rem, env(safe-area-inset-top));
+  right: max(.8rem, env(safe-area-inset-right));
+  z-index: 1001;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 253, 248, .92);
+  color: var(--ink);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+/* ── 住宿介紹照片（小相簿） ────────────────────────── */
+.stay-photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: .6rem;
+  margin: .7rem 0 .3rem;
+}
+.stay-photos figure { margin: 0; background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 4px; }
+.stay-photos img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 3px; }
+.stay-photos figcaption { font-family: var(--hand); font-size: .8rem; color: var(--ink-soft); padding: .25rem .15rem 0; }
+
 /* ── 旅程內頁 Hero 橫幅 ───────────────────────────── */
 .trip-hero {
   position: relative;
