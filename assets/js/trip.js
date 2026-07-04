@@ -56,6 +56,11 @@ function initTabs() {
   }));
   const initial = location.hash.slice(1);
   activate(['story', 'plan', 'photos', 'notes'].includes(initial) ? initial : 'story');
+  // 頁面已開啟時外部改 hash（如返回上一頁）也要跟著切換
+  window.addEventListener('hashchange', () => {
+    const name = location.hash.slice(1);
+    if (['story', 'plan', 'photos', 'notes'].includes(name)) activate(name);
+  });
 }
 
 async function loadStory() {

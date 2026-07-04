@@ -6,6 +6,16 @@ let editingId = null;
 
 const TICKET_TYPES = ['一般', '四腿票', '境外票', '廉航', '里程票'];
 
+// 前臺顯示狀態徽章（與住宿同邏輯，RLS 於資料庫層擋下未公開航班）
+function visibilityBadge(fl) {
+  if (fl.visibility === 'hidden') return '<span class="badge">🔒 永不公開</span>';
+  if (fl.visibility === 'public') return '<span class="badge badge-public">前臺公開中</span>';
+  const departed = fl.depart_time && new Date(fl.depart_time) < new Date();
+  return departed
+    ? '<span class="badge badge-public">已公開（已起飛）</span>'
+    : '<span class="badge">🔒 起飛後公開</span>';
+}
+
 export function initFlights() {
   const form = document.getElementById('flight-form');
   form.addEventListener('submit', saveFlight);
@@ -32,7 +42,7 @@ export async function loadFlights(trip) {
     ? data.map(fl => `
       <div class="card" data-id="${fl.id}">
         <div class="card-body">
-          <strong>航段 ${fl.segment_order}：${esc(fl.airline ?? '')} ${esc(fl.flight_no ?? '')}</strong>
+          <strong>航段 ${fl.segment_order}：${esc(fl.airline ?? '')} ${esc(fl.flight_no ?? '')}</strong> ${visibilityBadge(fl)}
           ${fl.transfer_type ? `<span class="badge">${esc(fl.transfer_type)}</span>` : ''}
           ${fl.ticket_type ? `<span class="badge">${esc(fl.ticket_type)}</span>` : ''}
           <div>${esc(fl.depart_airport ?? '?')} → ${esc(fl.arrive_airport ?? '?')}</div>
@@ -67,6 +77,7 @@ function fillForm(fl) {
   f.elements.depart_time.value = isoToLocal(fl.depart_time);
   f.elements.arrive_time.value = isoToLocal(fl.arrive_time);
   f.elements.layover_info.value = fl.layover_info ?? '';
+  f.elements.visibility.value = fl.visibility ?? 'after_departure';
   f.elements.transfer_type.value = fl.transfer_type ?? '';
   // 票種：在預設清單內直接選取；否則視為「其他」帶入手填欄
   const isPreset = !fl.ticket_type || TICKET_TYPES.includes(fl.ticket_type);
@@ -98,6 +109,7 @@ async function saveFlight(e) {
     depart_time: localToIso(f.elements.depart_time.value),
     arrive_time: localToIso(f.elements.arrive_time.value),
     layover_info: f.elements.layover_info.value.trim() || null,
+    visibility: f.elements.visibility.value,
     transfer_type: f.elements.transfer_type.value || null,
     ticket_type: f.elements.ticket_type_select.value === '其他'
       ? (f.elements.ticket_type_other.value.trim() || '其他')

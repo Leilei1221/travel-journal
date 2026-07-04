@@ -26,7 +26,7 @@ export async function loadStays(trip) {
     ? data.map(s => `
       <div class="card" data-id="${s.id}">
         <div class="card-body">
-          <strong>${esc(s.name)}</strong>
+          <strong>${esc(s.name)}</strong> ${visibilityBadge(s)}
           <div class="muted">${esc(s.check_in ?? '?')} 入住 ～ ${esc(s.check_out ?? '?')} 退房</div>
           ${s.address ? `<div class="muted">${esc(s.address)}</div>` : ''}
           ${s.stay_private?.order_no ? `<div class="private-field">🔒 訂單編號：${esc(s.stay_private.order_no)}</div>` : ''}
@@ -48,6 +48,16 @@ export async function loadStays(trip) {
   });
 }
 
+// 前臺顯示狀態徽章（行程安全：未達公開條件的住宿由 RLS 於資料庫層擋下）
+function visibilityBadge(s) {
+  if (s.visibility === 'hidden') return '<span class="badge">🔒 永不公開</span>';
+  if (s.visibility === 'public') return '<span class="badge badge-public">前臺公開中</span>';
+  const out = s.check_out && s.check_out < new Date().toISOString().slice(0, 10);
+  return out
+    ? '<span class="badge badge-public">已公開（已退房）</span>'
+    : '<span class="badge">🔒 住完後公開</span>';
+}
+
 // Google Maps 通用連結：手機自動喚起 Maps App、電腦開網頁版
 // 有 place_id 用 place_id 精準定位（query 為備援顯示）；否則用名稱＋地址搜尋
 function mapsUrl(s) {
@@ -64,6 +74,7 @@ function fillForm(s) {
   f.elements.google_place_id.value = s.google_place_id ?? '';
   f.elements.check_in.value = s.check_in ?? '';
   f.elements.check_out.value = s.check_out ?? '';
+  f.elements.visibility.value = s.visibility ?? 'after_checkout';
   f.elements.notes.value = s.notes ?? '';
   f.elements.order_no.value = s.stay_private?.order_no ?? '';
   f.elements.private_notes.value = s.stay_private?.private_notes ?? '';
@@ -84,6 +95,7 @@ async function saveStay(e) {
     google_place_id: f.elements.google_place_id.value.trim() || null,
     check_in: f.elements.check_in.value || null,
     check_out: f.elements.check_out.value || null,
+    visibility: f.elements.visibility.value,
     notes: f.elements.notes.value.trim() || null,
   };
 

@@ -11,6 +11,8 @@
   --card: #fffdf8;
   --hand: 'Iansui', 'Noto Sans TC', cursive;
   --body: 'Noto Sans TC', system-ui, sans-serif;
+  /* 背景插畫上的米白遮罩濃度：調高＝插畫更淡（建議 40%–60%） */
+  --bg-veil: 50%;
 }
 
 /* Iansui 只有 400 字重：手寫層一律正常字重，避免瀏覽器假加粗破壞手寫感 */
@@ -28,13 +30,24 @@ body {
   line-height: 1.7;
   color: var(--ink);
   background-color: var(--paper);
-  /* 手繪世界地圖＋航線浮水印、點陣暗紋（§7 質感基底） */
+}
+
+/* 手繪插畫背景（§7 質感基底）：fixed 不捲動、cover 滿版、上疊米白遮罩
+   用 fixed 定位偽元素而非 background-attachment: fixed，避免 iOS Safari 效能問題 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
   background-image:
-    url('../img/map-bg.svg'),
-    radial-gradient(rgba(61, 58, 52, 0.055) 1px, transparent 1px);
-  background-size: min(1300px, 170%) auto, 22px 22px;
-  background-position: center 90px, 0 0;
-  background-repeat: no-repeat, repeat;
+    linear-gradient(
+      color-mix(in srgb, var(--paper) var(--bg-veil), transparent),
+      color-mix(in srgb, var(--paper) var(--bg-veil), transparent)
+    ),
+    url('../img/bg-doodle.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 img { max-width: 100%; display: block; }

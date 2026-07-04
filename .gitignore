@@ -3,3 +3,6 @@
 
 # Claude Code 本機設定（launch.json 等個人環境設定不進版控）
 .claude/
+
+# 背景插畫原始 PNG（1.8MB，前臺只用壓縮後的 webp）
+assets/img/bg-doodle.png
