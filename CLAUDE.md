@@ -39,6 +39,5 @@
   - 追加：✅ 後臺文章管理（posts：行前情報/每日遊記→前臺旅程故事；旅程總結→旅行筆記）✅ 照片上傳後可編輯說明/日期/住宿關聯 ✅ 住宿介紹照片（photos.stay_id，公開時機跟隨住宿）✅ 首頁旅行地圖（travel-map.webp＋燈箱，手機雙指縮放；更新地圖＝覆蓋 assets/img/travel-map.png 後重轉 webp）
   - 追加：✅ 照片打卡位置（location_name＋GPS 座標，後臺「用目前位置打卡」；前臺照片牆 📍 Maps 連結）
   - 待辦：Google Places 住宿/景點抓取（§9）
-- Phase 3（本階段）：✅ Edge Function `gemini-draft`（金鑰只在函式環境變數、驗證登入、鏡像檔 `supabase/functions/gemini-draft/index.ts`）✅ AI 遊記草稿＋歷史行程回填（後臺文章頁籤「AI 草稿助手」，產出填入表單為草稿、原文存 ai_draft）✅ FB 貼文產生器（自動附前臺連結，複製貼上發文）
-  - 待辦：依主題色生成專屬背景插畫（§7 註記）
-- Phase 4 起：見 PLAN.md §9
+- Phase 3：✅ Edge Function `gemini-draft`（金鑰只在函式環境變數、驗證登入、鏡像檔 `supabase/functions/gemini-draft/index.ts`）✅ AI 遊記草稿＋歷史行程回填（後臺文章頁籤「AI 草稿助手」，產出填入表單為草稿、原文存 ai_draft）✅ FB 貼文產生器（自動附前臺連結，複製貼上發文）✅ 旅程專屬背景插畫（mode: background 用 gemini-2.5-flash-image 依目的地＋主題色生成；後臺旅程編輯「生成→預覽→套用」，存 Storage backgrounds/{tripId}.webp＋trips.bg_image_url；前臺以 --bg-image CSS 變數覆寫，未設定用預設 bg-doodle）
+- Phase 4 起：見 PLAN.md §9（航班狀態查詢、Gmail 異動信解析、A5 PDF 小書）

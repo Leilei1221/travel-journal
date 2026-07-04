@@ -44,7 +44,7 @@ body::before {
       color-mix(in srgb, var(--paper) var(--bg-veil), transparent),
       color-mix(in srgb, var(--paper) var(--bg-veil), transparent)
     ),
-    url('../img/bg-doodle.webp');
+    var(--bg-image, url('../img/bg-doodle.webp')); /* 旅程有專屬背景時由 trip.js 覆寫 */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

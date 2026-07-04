@@ -40,7 +40,8 @@ async function tripContext() {
   return lines.join('\n');
 }
 
-async function callGemini(mode, context, notes) {
+// 共用：呼叫 gemini-draft Edge Function（文字模式回 {text}，圖片模式回 {image, mimeType}）
+export async function callGemini(mode, context, notes) {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) throw new Error('請先登入');
   const res = await fetch(`${SUPABASE_URL}/functions/v1/gemini-draft`, {
@@ -54,7 +55,7 @@ async function callGemini(mode, context, notes) {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
-  return data.text;
+  return data;
 }
 
 async function generateDraft(mode) {
@@ -66,7 +67,7 @@ async function generateDraft(mode) {
   statusEl.textContent = 'AI 書寫中…（約 10–30 秒）';
   try {
     const context = document.getElementById('ai-include-context').checked ? await tripContext() : '';
-    const text = await callGemini(mode, context, notes);
+    const { text } = await callGemini(mode, context, notes);
     // 第一行＝標題，其餘＝內文 → 填入下方文章表單（草稿）
     const [firstLine, ...rest] = text.split('\n');
     const f = document.getElementById('post-form');
@@ -95,7 +96,7 @@ async function generateFb() {
   statusEl.textContent = '小編撰寫中…';
   try {
     const context = `前臺連結：${FRONT_BASE}/trip.html?id=${trip.id}`;
-    document.getElementById('ai-fb-result').value = await callGemini('fb', context, notes);
+    document.getElementById('ai-fb-result').value = (await callGemini('fb', context, notes)).text;
     statusEl.textContent = '';
     toast('FB 貼文已產生，複製後貼到粉專即可');
   } catch (err) {

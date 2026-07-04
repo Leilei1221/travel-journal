@@ -11,7 +11,7 @@ async function init() {
 
   const { data: trip } = await supabase
     .from('trips')
-    .select('id, title, destination, start_date, end_date, status, cover_photo_url, theme')
+    .select('id, title, destination, start_date, end_date, status, cover_photo_url, theme, bg_image_url')
     .eq('id', tripId)
     .eq('is_public', true)
     .maybeSingle();
@@ -20,6 +20,10 @@ async function init() {
   // 套用主題色（骨架不變、換皮膚）
   for (const [k, v] of Object.entries(trip.theme ?? {})) {
     if (k.startsWith('--')) document.documentElement.style.setProperty(k, v);
+  }
+  // 專屬背景插畫（Phase 3 生成；未設定則用預設 bg-doodle）
+  if (trip.bg_image_url) {
+    document.documentElement.style.setProperty('--bg-image', `url("${trip.bg_image_url}")`);
   }
 
   document.title = `${trip.title}｜Lei's Go!`;

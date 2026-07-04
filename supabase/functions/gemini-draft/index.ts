@@ -82,6 +82,39 @@ Deno.serve(async (req) => {
     if (authError || !user) return json({ error: '請先登入後臺再使用 AI 功能' }, 401);
 
     const { mode, context = '', notes = '' } = await req.json();
+
+    // ── 圖片模式：依主題色生成旅程專屬背景插畫（§7）─────────
+    if (mode === 'background') {
+      const c = (typeof context === 'object' && context) ? context as Record<string, string> : {};
+      const prompt = `A very pale, low-contrast watercolor and ink doodle background illustration for a personal travel journal website.
+Cream paper base color ${c.paper ?? '#faf6ee'}. Small hand-drawn doodles arranged around the EDGES and corners only — the CENTER must remain completely empty plain paper.
+Motifs: iconic landmarks, nature and food of ${c.destination ?? 'a travel destination'}, plus tiny travel icons (paper plane, dashed flight path, little hearts, paw prints).
+Color palette: muted, desaturated tints of ${c.main ?? '#7a9e9f'} and ${c.accent ?? '#e07a5f'} on cream paper.
+Style: gentle storybook watercolor, faded like old stamps on paper, extremely light and airy so website text stays readable on top of it.
+Absolutely NO text, NO letters, NO numbers, NO watermark.`;
+      const imgRes = await fetch(
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { imageConfig: { aspectRatio: '16:9' } },
+          }),
+        },
+      );
+      if (!imgRes.ok) {
+        console.error('Gemini image error', imgRes.status, await imgRes.text());
+        return json({ error: `Gemini 圖片 API 錯誤（HTTP ${imgRes.status}），請稍後再試` }, 502);
+      }
+      const imgData = await imgRes.json();
+      const part = (imgData.candidates?.[0]?.content?.parts ?? [])
+        .find((p: { inlineData?: { data?: string } }) => p.inlineData?.data);
+      if (!part) return json({ error: 'AI 沒有產生圖片，請再試一次' }, 502);
+      return json({ image: part.inlineData.data, mimeType: part.inlineData.mimeType ?? 'image/png' });
+    }
+
+    // ── 文字模式：遊記草稿/歷史回填/FB 貼文 ─────────────────
     const build = PROMPTS[mode];
     if (!build) return json({ error: `未知的 mode：${mode}` }, 400);
     if (!String(notes).trim()) return json({ error: '請先填入素材' }, 400);

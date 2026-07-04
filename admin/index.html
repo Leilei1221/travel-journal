@@ -69,6 +69,17 @@
           <label>強調色<input type="color" name="theme_accent" value="#e07a5f"></label>
           <label>紙張底色<input type="color" name="theme_paper" value="#faf6ee"></label>
         </fieldset>
+        <fieldset class="full ai-box" id="trip-bg-box" hidden>
+          <legend>🎨 AI 專屬背景插畫</legend>
+          <p class="muted">依目的地與上方主題色生成手繪風背景，套用後這趟旅程的內頁會換上專屬背景（其他旅程不受影響）。先生成預覽，滿意再套用。</p>
+          <img id="trip-bg-preview" class="edit-preview" alt="背景插畫預覽" hidden>
+          <div class="form-actions">
+            <button type="button" id="trip-bg-generate">🎨 生成背景</button>
+            <button type="button" id="trip-bg-apply" hidden>套用到這趟旅程</button>
+            <button type="button" id="trip-bg-clear" hidden>清除背景（改用預設）</button>
+            <span id="trip-bg-status" class="muted"></span>
+          </div>
+        </fieldset>
         <div class="full form-actions">
           <button type="submit">儲存旅程</button>
           <button type="button" id="trip-form-reset">清空/取消編輯</button>
