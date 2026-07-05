@@ -1,6 +1,6 @@
 // 旅程內頁：per-trip 主題色＋四頁籤（故事/行程/照片/筆記）
 // 只查公開表；私人表（*_private、expenses）永不撈取
-import { supabase, esc, textToHtml, dateRange, mapsUrl } from './front-client.js?v=5';
+import { supabase, esc, textToHtml, dateRange, mapsUrl } from './front-client.js?v=7';
 
 const POST_TYPE_LABEL = { pretrip: '行前情報', daily: '每日遊記', summary: '旅程總結' };
 
@@ -121,9 +121,26 @@ async function renderPosts(el, posts, emptyText) {
       </article>`).join('');
 }
 
+// 行程項目的 Google Maps 連結：有 place_id 用 place_id，否則座標，否則地點名稱搜尋
+function itineraryMapsUrl(item) {
+  if (item.google_place_id) {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.place_name)}&query_place_id=${encodeURIComponent(item.google_place_id)}`;
+  }
+  if (item.lat != null && item.lng != null) {
+    return `https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}`;
+  }
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.place_name)}`;
+}
+
+// 相鄰兩站的 Google Maps 路線連結（預設大眾運輸；與後臺 itinerary.js 一致）
+function itineraryRouteUrl(from, to) {
+  const point = p => p.lat != null && p.lng != null ? `${p.lat},${p.lng}` : encodeURIComponent(p.place_name);
+  return `https://www.google.com/maps/dir/?api=1&origin=${point(from)}&destination=${point(to)}&travelmode=transit`;
+}
+
 async function loadPlan() {
   const el = document.getElementById('panel-plan');
-  const [flights, stays, cards, stayPhotos] = await Promise.all([
+  const [flights, stays, cards, stayPhotos, itinerary] = await Promise.all([
     supabase.from('flights')
       .select('segment_order, airline, flight_no, depart_airport, arrive_airport, depart_time, arrive_time, layover_info, transfer_type, ticket_type, notes')
       .eq('trip_id', tripId).order('segment_order'),
@@ -137,6 +154,9 @@ async function loadPlan() {
     supabase.from('photos')
       .select('src_url, caption, stay_id')
       .eq('trip_id', tripId).not('stay_id', 'is', null).order('sort_order'),
+    supabase.from('itinerary_items')
+      .select('item_date, time_label, place_name, notes, lat, lng, google_place_id')
+      .eq('trip_id', tripId).order('item_date', { nullsFirst: false }).order('sort_order'),
   ]);
 
   const photosByStay = {};
@@ -194,7 +214,33 @@ async function loadPlan() {
         ${c.cost_note ? `<div class="sub">費用參考：${esc(c.cost_note)}</div>` : ''}
       </div>`).join('')}` : '';
 
-  const html = flightHtml + stayHtml + cardHtml;
+  // 每日時間線（依日期分組；無日期的項目歸在「未定日期」）
+  const dayGroups = new Map();
+  for (const it of itinerary.data ?? []) {
+    const key = it.item_date || '未定日期';
+    if (!dayGroups.has(key)) dayGroups.set(key, []);
+    dayGroups.get(key).push(it);
+  }
+  const timelineHtml = dayGroups.size ? `
+    <h3>🗓 每日行程</h3>
+    ${[...dayGroups.entries()].map(([date, items]) => `
+      <div class="timeline-day">
+        <h4 class="timeline-day-title">${esc(date === '未定日期' ? date : date.replaceAll('-', '.'))}</h4>
+        <div class="timeline">
+          ${items.map((it, i) => `
+            <div class="timeline-item">
+              ${it.time_label ? `<span class="timeline-time">${esc(it.time_label)}</span>` : ''}
+              <div class="timeline-body">
+                <strong>${esc(it.place_name)}</strong>
+                ${it.notes ? `<div class="sub">${esc(it.notes)}</div>` : ''}
+                <a class="maps-link" href="${esc(itineraryMapsUrl(it))}" target="_blank" rel="noopener">🗺 在 Google Maps 開啟</a>
+                ${i < items.length - 1 ? `<a class="maps-link route" href="${esc(itineraryRouteUrl(it, items[i + 1]))}" target="_blank" rel="noopener">🚇 前往下一站路線</a>` : ''}
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>`).join('')}` : '';
+
+  const html = timelineHtml + flightHtml + stayHtml + cardHtml;
   el.innerHTML = html
     ? `<div class="itinerary">${html}</div>`
     : '<p class="empty-note">行程還在規劃中…</p>';

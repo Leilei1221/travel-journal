@@ -1,6 +1,9 @@
 // 記帳 CRUD — expenses 表 RLS 僅本人可讀寫，前臺永不撈取
 // 可選擇性關聯到目前旅程的某筆住宿/航班/交通卡片（擇一）
-import { supabase, esc, toast } from './supabase-client.js?v=5';
+import { supabase, SUPABASE_URL, SUPABASE_KEY, esc, toast } from './supabase-client.js?v=7';
+import { setAiStatus } from './ai.js?v=7';
+
+const RECEIPT_MAX_EDGE = 1200;
 
 let tripId = null;
 let editingId = null;
@@ -8,6 +11,64 @@ let editingId = null;
 export function initExpenses() {
   document.getElementById('expense-form').addEventListener('submit', saveExpense);
   document.getElementById('expense-form-reset').addEventListener('click', resetForm);
+  document.getElementById('receipt-input').addEventListener('change', onReceiptSelected);
+}
+
+// ── 拍收據辨識：壓縮成 1200px → base64 → gemini-draft(mode:receipt) → 預填表單 ──
+async function compressToBase64(file) {
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, RECEIPT_MAX_EDGE / Math.max(bitmap.width, bitmap.height));
+  const w = Math.round(bitmap.width * scale);
+  const h = Math.round(bitmap.height * scale);
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  canvas.getContext('2d').drawImage(bitmap, 0, 0, w, h);
+  bitmap.close();
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+  return dataUrl.split(',')[1]; // 去掉 data:image/jpeg;base64, 前綴
+}
+
+async function onReceiptSelected(e) {
+  const file = e.target.files[0];
+  const statusEl = document.getElementById('receipt-status');
+  if (!file) return;
+  setAiStatus(statusEl, '壓縮並辨識中…（約 10–20 秒）');
+  try {
+    const image = await compressToBase64(file);
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error('請先登入');
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/gemini-draft`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+        'apikey': SUPABASE_KEY,
+      },
+      body: JSON.stringify({ mode: 'receipt', image, mimeType: 'image/jpeg' }),
+    });
+    const parsed = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(parsed.error ?? `HTTP ${res.status}`);
+    fillFromReceipt(parsed);
+    setAiStatus(statusEl, '✓ 已預填下方表單，請確認金額/品項後再儲存', 'ok');
+  } catch (err) {
+    setAiStatus(statusEl, '⚠ 辨識失敗：' + err.message, 'error');
+  } finally {
+    e.target.value = '';
+  }
+}
+
+function fillFromReceipt(r) {
+  const f = document.getElementById('expense-form');
+  editingId = null;
+  const items = Array.isArray(r.items) ? r.items : [];
+  f.elements.title.value = r.note || items[0]?.name || '收據';
+  if (r.total != null) f.elements.amount.value = r.total;
+  if (r.currency) f.elements.currency.value = String(r.currency).toUpperCase();
+  if (r.date) f.elements.spent_on.value = r.date;
+  const itemLines = items.map(it => `${it.name ?? ''} ${it.price ?? ''}`.trim()).join('、');
+  f.elements.note.value = [r.note, itemLines].filter(Boolean).join('｜');
+  f.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 export async function loadExpenses(trip) {

@@ -238,6 +238,47 @@ fieldset { border: 1px dashed var(--line); border-radius: 8px; display: grid; ga
   font-size: .8rem;
 }
 
+/* 天氣卡 */
+.weather-card {
+  margin: .8rem 1.2rem 0;
+  padding: .7rem 1rem;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+.weather-head { display: flex; justify-content: space-between; align-items: center; font-weight: 700; }
+.weather-retry {
+  padding: .2rem .6rem;
+  font-size: .8rem;
+  background: #fff;
+  color: var(--main);
+  border-color: var(--main);
+}
+.weather-city-form { display: flex; gap: .5rem; }
+.weather-city-form input { flex: 1; }
+.weather-now { display: flex; align-items: baseline; gap: .6rem; }
+.weather-now-temp { font-size: 1.6rem; font-weight: 700; color: var(--main); }
+.weather-days { display: flex; gap: 1rem; flex-wrap: wrap; font-size: .85rem; }
+.weather-day { display: flex; flex-direction: column; align-items: center; gap: .15rem; }
+.weather-day-label { font-weight: 700; }
+.weather-range { color: #8a8578; }
+
+/* 行程規劃：依日期分組的時間線 */
+.itinerary-day-group { margin-bottom: 1.2rem; }
+.itinerary-day-label {
+  font-size: .95rem;
+  font-weight: 700;
+  color: var(--main);
+  border-bottom: 1px dashed var(--line);
+  padding-bottom: .2rem;
+  margin: 0 0 .5rem;
+}
+.itinerary-day-group .card { border-left: 3px solid var(--main); }
+.itinerary-day-group .card-body .btn-link { margin-top: .4rem; display: inline-block; }
+
 /* Toast */
 .toast {
   position: fixed;

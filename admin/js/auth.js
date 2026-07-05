@@ -1,5 +1,5 @@
 // 登入/登出/session 管理（Supabase Auth，email + 密碼）
-import { supabase, toast } from './supabase-client.js?v=5';
+import { supabase, toast } from './supabase-client.js?v=7';
 
 export function initAuth({ onLogin, onLogout }) {
   const loginForm = document.getElementById('login-form');

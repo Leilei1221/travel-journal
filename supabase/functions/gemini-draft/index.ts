@@ -81,7 +81,7 @@ Deno.serve(async (req) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) return json({ error: '請先登入後臺再使用 AI 功能' }, 401);
 
-    const { mode, context = '', notes = '' } = await req.json();
+    const { mode, context = '', notes = '', image, mimeType = 'image/jpeg' } = await req.json();
 
     // ── 圖片模式：依主題色生成旅程專屬背景插畫（§7）─────────
     if (mode === 'background') {
@@ -112,6 +112,46 @@ Absolutely NO text, NO letters, NO numbers, NO watermark.`;
         .find((p: { inlineData?: { data?: string } }) => p.inlineData?.data);
       if (!part) return json({ error: 'AI 沒有產生圖片，請再試一次' }, 502);
       return json({ image: part.inlineData.data, mimeType: part.inlineData.mimeType ?? 'image/png' });
+    }
+
+    // ── 收據辨識：拍照/選圖 → Gemini Vision 解析成結構化記帳資料（記帳「拍收據辨識」）──
+    if (mode === 'receipt') {
+      if (!image) return json({ error: '請先選擇或拍攝收據照片' }, 400);
+      const prompt = `你是幫忙記帳的助理。請閱讀這張收據/發票照片，並「只」輸出一個 JSON 物件，不要任何說明文字、不要 Markdown code fence。
+JSON 格式：
+{"items": [{"name": "品項名稱", "price": 數字}], "total": 總金額數字, "currency": "幣別 ISO 代碼，例如 TWD/USD/THB/JPY，看不出來就填 TWD", "date": "YYYY-MM-DD 或 null", "note": "店名或其他有幫助的簡短備註，看不出來就填 null"}
+若某欄位看不出來就填 null 或空陣列，絕不可捏造。`;
+      const visRes = await fetch(
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType, data: image } }] }],
+            generationConfig: { temperature: 0.2, maxOutputTokens: 2048 },
+          }),
+        },
+      );
+      if (!visRes.ok) {
+        console.error('Gemini vision error', visRes.status, await visRes.text());
+        return json({ error: `Gemini API 錯誤（HTTP ${visRes.status}），請稍後再試` }, 502);
+      }
+      const visData = await visRes.json();
+      const raw = (visData.candidates?.[0]?.content?.parts ?? [])
+        .map((p: { text?: string }) => p.text ?? '')
+        .join('')
+        .trim();
+      if (!raw) return json({ error: 'AI 沒有辨識出內容，請換張更清楚的照片再試' }, 502);
+      // 去除可能的 Markdown 圍欄（```json ... ```）再解析
+      const stripped = raw.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(stripped);
+      } catch {
+        console.error('receipt JSON parse failed', raw);
+        return json({ error: 'AI 回傳格式無法解析，請再試一次' }, 502);
+      }
+      return json(parsed as Record<string, unknown>);
     }
 
     // ── 文字模式：遊記草稿/歷史回填/FB 貼文 ─────────────────

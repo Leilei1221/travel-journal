@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex">
   <title>旅遊手帳｜後臺</title>
-  <link rel="stylesheet" href="css/admin.css?v=5">
+  <link rel="stylesheet" href="css/admin.css?v=7">
 </head>
 <body>
 
@@ -33,11 +33,25 @@
       <span id="current-trip-label">尚未選取旅程 — 請先在「旅程」頁籤選取或建立</span>
     </div>
 
+    <div id="weather-card" class="weather-card">
+      <div class="weather-head">
+        <span>🌤️ 目前所在地天氣</span>
+        <button type="button" id="weather-retry-geo" class="weather-retry">重新定位</button>
+      </div>
+      <span id="weather-status" class="muted"></span>
+      <form id="weather-city-form" class="weather-city-form" hidden>
+        <input name="city" placeholder="輸入城市名稱，例：曼谷">
+        <button type="submit">查詢</button>
+      </form>
+      <div id="weather-result" class="weather-result" hidden></div>
+    </div>
+
     <nav class="tabs">
       <button class="tab active" data-tab="trips">旅程</button>
       <button class="tab" data-tab="flights" disabled>航班</button>
       <button class="tab" data-tab="stays" disabled>住宿</button>
       <button class="tab" data-tab="transport" disabled>交通卡片</button>
+      <button class="tab" data-tab="itinerary" disabled>行程</button>
       <button class="tab" data-tab="expenses" disabled>記帳</button>
       <button class="tab" data-tab="photos" disabled>照片</button>
       <button class="tab" data-tab="posts" disabled>文章</button>
@@ -219,11 +233,48 @@
       </form>
     </main>
 
+    <!-- 行程 -->
+    <main id="tab-itinerary" class="tab-panel" hidden>
+      <h2>行程規劃</h2>
+      <p class="muted">依日期分組顯示，相鄰兩站會提供「前往下一站」的大眾運輸路線連結。</p>
+      <div id="itinerary-list" class="list"></div>
+
+      <h2>新增／編輯行程項目</h2>
+      <form id="itinerary-form" class="form-grid">
+        <label>日期<input type="date" name="item_date"></label>
+        <label>時間/時段<input name="time_label" placeholder="例：09:00 或 上午"></label>
+        <label>排序<input type="number" name="sort_order" value="0"></label>
+        <label class="full">地點名稱 *<input name="place_name" required placeholder="例：大皇宮"></label>
+        <label>Google Place ID（選填）<input name="google_place_id" placeholder="日後接 Places 自動帶入"></label>
+        <div class="checkin-row">
+          <button type="button" class="checkin-btn">📍 用目前位置打卡（GPS）</button>
+          <span class="checkin-status muted">未定位</span>
+          <button type="button" class="checkin-clear" hidden>清除定位</button>
+          <input type="hidden" name="lat"><input type="hidden" name="lng">
+        </div>
+        <label class="full">備註<textarea name="notes" rows="4"></textarea></label>
+        <div class="full form-actions">
+          <button type="submit">儲存行程</button>
+          <button type="button" id="itinerary-form-reset">清空/取消編輯</button>
+        </div>
+      </form>
+    </main>
+
     <!-- 記帳 -->
     <main id="tab-expenses" class="tab-panel" hidden>
       <h2>記帳（🔒 僅自己可見，前臺不顯示）</h2>
       <div id="expense-summary" class="expense-summary"></div>
       <div id="expense-list" class="list"></div>
+
+      <h2>🧾 拍收據辨識</h2>
+      <div class="form-grid ai-box">
+        <label class="full">選擇/拍攝收據照片（AI 只會解析並預填下方表單，仍需你確認後才會儲存）
+          <input type="file" id="receipt-input" accept="image/*" capture="environment">
+        </label>
+        <div class="full form-actions">
+          <span id="receipt-status" class="muted"></span>
+        </div>
+      </div>
 
       <h2>新增／編輯記帳</h2>
       <form id="expense-form" class="form-grid">
@@ -389,15 +440,17 @@
   </section>
 
   <script type="module">
-    import { initAuth } from './js/auth.js?v=5';
-    import { initTrips, loadTrips } from './js/trips.js?v=5';
-    import { initFlights, loadFlights } from './js/flights.js?v=5';
-    import { initStays, loadStays } from './js/stays.js?v=5';
-    import { initTransport, loadTransport } from './js/transport.js?v=5';
-    import { initExpenses, loadExpenses } from './js/expenses.js?v=5';
-    import { initPhotos, loadPhotos } from './js/photos.js?v=5';
-    import { initPosts, loadPosts } from './js/posts.js?v=5';
-    import { initAi, loadAi } from './js/ai.js?v=5';
+    import { initAuth } from './js/auth.js?v=7';
+    import { initTrips, loadTrips } from './js/trips.js?v=7';
+    import { initFlights, loadFlights } from './js/flights.js?v=7';
+    import { initStays, loadStays } from './js/stays.js?v=7';
+    import { initTransport, loadTransport } from './js/transport.js?v=7';
+    import { initItinerary, loadItinerary } from './js/itinerary.js?v=7';
+    import { initExpenses, loadExpenses } from './js/expenses.js?v=7';
+    import { initPhotos, loadPhotos } from './js/photos.js?v=7';
+    import { initPosts, loadPosts } from './js/posts.js?v=7';
+    import { initAi, loadAi } from './js/ai.js?v=7';
+    import { initWeather } from './js/weather.js?v=7';
 
     const loginView = document.getElementById('login-view');
     const appView = document.getElementById('app-view');
@@ -408,6 +461,7 @@
       flights: () => loadFlights(currentTrip),
       stays: () => loadStays(currentTrip),
       transport: () => loadTransport(currentTrip),
+      itinerary: () => loadItinerary(currentTrip),
       expenses: () => loadExpenses(currentTrip),
       photos: () => loadPhotos(currentTrip),
       posts: () => { loadPosts(currentTrip); loadAi(currentTrip); },
@@ -434,10 +488,12 @@
     initFlights();
     initStays();
     initTransport();
+    initItinerary();
     initExpenses();
     initPhotos();
     initPosts();
     initAi();
+    initWeather();
 
     initAuth({
       onLogin() {

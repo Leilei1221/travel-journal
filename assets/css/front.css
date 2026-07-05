@@ -355,6 +355,38 @@ section { padding: 2.2rem 0; }
 }
 .maps-link:hover { background: color-mix(in srgb, var(--main) 12%, #fff); }
 
+/* 每日行程時間線 */
+.timeline-day-title { font-family: var(--hand); font-size: 1.15rem; margin: 1.4rem 0 .6rem; color: var(--main); filter: brightness(.82); }
+.timeline { position: relative; padding-left: 1.4rem; }
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: .3rem;
+  top: .4rem;
+  bottom: .4rem;
+  width: 2px;
+  background: color-mix(in srgb, var(--main) 30%, transparent);
+}
+.timeline-item { position: relative; padding-bottom: 1.1rem; }
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -1.15rem;
+  top: .35rem;
+  width: .55rem;
+  height: .55rem;
+  border-radius: 50%;
+  background: var(--main);
+}
+.timeline-time {
+  display: inline-block;
+  font-family: var(--hand);
+  font-size: .85rem;
+  color: var(--main);
+  margin-bottom: .15rem;
+}
+.timeline-body strong { font-size: 1.02rem; }
+
 /* ── 文章（旅程故事/筆記） ────────────────────────── */
 .post {
   background: var(--card);
