@@ -1,7 +1,7 @@
 // 照片上傳與管理 — 前端壓縮（長邊 1600px、目標 ≤ 350KB，PLAN.md §6）後傳 Supabase Storage
 // photos.src_url 存公開網址：日後搬遷 R2 只改網址、不改程式
 // 照片可選擇性關聯到住宿（住宿介紹照片；前臺跟隨該住宿的公開時機）
-import { supabase, esc, toast } from './supabase-client.js';
+import { supabase, esc, toast } from './supabase-client.js?v=5';
 
 const MAX_EDGE = 1600;
 const TARGET_BYTES = 350 * 1024;
@@ -45,7 +45,7 @@ function wireCheckin(form) {
 export async function loadPhotos(trip) {
   tripId = trip.id;
   cancelEdit();
-  await Promise.all([loadStayOptions(), loadList()]);
+  await Promise.all([loadStayOptions(), loadPostOptions(), loadList()]);
 }
 
 // 「關聯住宿」下拉（上傳表單與編輯表單共用選項）
@@ -58,11 +58,21 @@ async function loadStayOptions() {
   document.querySelectorAll('select[name="photo_stay"]').forEach(sel => sel.innerHTML = options);
 }
 
+// 「配圖到文章」下拉
+async function loadPostOptions() {
+  const { data } = await supabase
+    .from('posts').select('id, title, post_type').eq('trip_id', tripId)
+    .order('post_date', { nullsFirst: true });
+  const options = '<option value="">（不關聯文章）</option>'
+    + (data ?? []).map(p => `<option value="${p.id}">${esc(p.title ?? '（未命名）')}</option>`).join('');
+  document.querySelectorAll('select[name="photo_post"]').forEach(sel => sel.innerHTML = options);
+}
+
 async function loadList() {
   const listEl = document.getElementById('photo-list');
   const { data, error } = await supabase
     .from('photos')
-    .select('*, stays(name)')
+    .select('*, stays(name), posts(title)')
     .eq('trip_id', tripId)
     .order('taken_on', { nullsFirst: false })
     .order('sort_order');
@@ -75,7 +85,9 @@ async function loadList() {
         <figcaption>
           <span>
             ${p.stays ? `<span class="badge">🏨 ${esc(p.stays.name)}</span> ` : ''}
+            ${p.posts ? `<span class="badge">📝 ${esc(p.posts.title ?? '文章')}</span> ` : ''}
             ${p.location_name || p.lat != null ? `<span class="badge">📍 ${esc(p.location_name ?? 'GPS')}</span> ` : ''}
+            ${p.is_featured ? '<span class="badge badge-public">★精選</span> ' : ''}
             ${esc(p.taken_on ?? '')} ${esc(p.caption ?? '')}
           </span>
           <span class="photo-actions">
@@ -124,6 +136,7 @@ async function uploadPhotos(e) {
   const takenOn = f.elements.taken_on.value || null;
   const caption = f.elements.caption.value.trim() || null;
   const stayId = f.elements.photo_stay.value || null;
+  const postId = f.elements.photo_post.value || null;
   const locationName = f.elements.location_name.value.trim() || null;
   const lat = f.elements.lat.value === '' ? null : Number(f.elements.lat.value);
   const lng = f.elements.lng.value === '' ? null : Number(f.elements.lng.value);
@@ -149,6 +162,7 @@ async function uploadPhotos(e) {
         storage_path: path,
         caption,
         stay_id: stayId,
+        post_id: postId,
         location_name: locationName,
         lat,
         lng,
@@ -178,7 +192,9 @@ function startEdit(p) {
   f.elements.caption.value = p.caption ?? '';
   f.elements.taken_on.value = p.taken_on ?? '';
   f.elements.photo_stay.value = p.stay_id ?? '';
+  f.elements.photo_post.value = p.post_id ?? '';
   f.elements.location_name.value = p.location_name ?? '';
+  f.elements.is_featured.checked = !!p.is_featured;
   setCheckin(f, p.lat, p.lng);
   box.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
@@ -197,7 +213,9 @@ async function saveEdit(e) {
     caption: f.elements.caption.value.trim() || null,
     taken_on: f.elements.taken_on.value || null,
     stay_id: f.elements.photo_stay.value || null,
+    post_id: f.elements.photo_post.value || null,
     location_name: f.elements.location_name.value.trim() || null,
+    is_featured: f.elements.is_featured.checked,
     lat: f.elements.lat.value === '' ? null : Number(f.elements.lat.value),
     lng: f.elements.lng.value === '' ? null : Number(f.elements.lng.value),
   }).eq('id', editingId);

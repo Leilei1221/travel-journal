@@ -367,6 +367,30 @@ section { padding: 2.2rem 0; }
 .post h3 { font-family: var(--hand); margin: 0 0 .2rem; font-size: 1.3rem; }
 .post .post-date { font-family: var(--hand); color: var(--ink-soft); font-size: .88rem; }
 .post .post-body { margin-top: .8rem; max-width: 68ch; }
+/* 文章配圖 */
+.post-photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: .8rem; margin-top: 1rem; }
+.post-photos figure { margin: 0; background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 5px; box-shadow: 0 2px 6px rgba(61,58,52,.1); }
+.post-photos img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 3px; }
+.post-photos figcaption { font-family: var(--hand); font-size: .82rem; color: var(--ink-soft); text-align: center; padding-top: .3rem; }
+
+/* 照片牆：依打卡地點分組 */
+.photo-group { margin-bottom: 2rem; }
+.photo-group-title { font-family: var(--hand); font-weight: 400; font-size: 1.2rem; color: var(--main); margin: 0 0 .8rem; }
+.photo-group-title .muted { font-size: .85rem; }
+.photo-more { margin-top: 1rem; }
+/* .polaroid-grid 的 display:grid 會蓋掉 [hidden]，需更高specificity才收得起來 */
+.polaroid-grid.photo-more[hidden] { display: none; }
+.btn-more {
+  font-family: var(--hand);
+  margin-top: .9rem;
+  padding: .4rem 1.1rem;
+  background: #fff;
+  color: var(--accent);
+  border: 1.5px solid var(--accent);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.btn-more:hover { background: color-mix(in srgb, var(--accent) 10%, #fff); }
 
 /* 空狀態（手寫） */
 .empty-note {

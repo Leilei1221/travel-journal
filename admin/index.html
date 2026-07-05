@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex">
   <title>旅遊手帳｜後臺</title>
-  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/admin.css?v=5">
 </head>
 <body>
 
@@ -62,7 +62,15 @@
           </select>
         </label>
         <label class="checkbox"><input type="checkbox" name="is_public">前臺公開這趟旅程</label>
-        <label class="full">封面照網址<input name="cover_photo_url" placeholder="可先留白，之後從照片挑選"></label>
+        <fieldset class="full cover-fieldset" id="cover-box" hidden>
+          <legend>封面照</legend>
+          <p class="muted" id="cover-empty" hidden>這趟旅程還沒有照片，先到「照片」頁籤上傳，或用下方進階選項貼網址。</p>
+          <div id="cover-thumbs" class="cover-thumbs"></div>
+          <details class="cover-advanced">
+            <summary>進階：直接貼封面照網址</summary>
+            <input name="cover_photo_url" placeholder="https://…（留空則用上方挑選的照片）">
+          </details>
+        </fieldset>
         <fieldset class="full theme-fieldset">
           <legend>主題色（骨架不變、換皮膚 — 紙張底色請維持淺色米白系）</legend>
           <label>主色<input type="color" name="theme_main" value="#7a9e9f"></label>
@@ -269,8 +277,11 @@
         </label>
         <label>拍攝日期<input type="date" name="taken_on"></label>
         <label>說明<input name="caption" placeholder="套用到這批照片"></label>
-        <label>關聯住宿（住宿介紹照片）
+        <label>關聯住宿（住宿介紹照片，不進照片牆）
           <select name="photo_stay"><option value="">（一般照片，不關聯）</option></select>
+        </label>
+        <label>配圖到文章（顯示在該文章內，不進照片牆）
+          <select name="photo_post"><option value="">（不關聯文章）</option></select>
         </label>
         <label>打卡位置（美食記/景點）<input name="location_name" placeholder="例：巷口豆花店"></label>
         <div class="full checkin-row">
@@ -294,7 +305,11 @@
           <label>關聯住宿
             <select name="photo_stay"><option value="">（一般照片，不關聯）</option></select>
           </label>
+          <label>配圖到文章
+            <select name="photo_post"><option value="">（不關聯文章）</option></select>
+          </label>
           <label>打卡位置<input name="location_name" placeholder="例：巷口豆花店"></label>
+          <label class="checkbox"><input type="checkbox" name="is_featured">設為此打卡點的精選照（照片牆優先顯示）</label>
           <div class="full checkin-row">
             <button type="button" class="checkin-btn">📍 用目前位置打卡（GPS）</button>
             <span class="checkin-status muted">未定位</span>
@@ -374,15 +389,15 @@
   </section>
 
   <script type="module">
-    import { initAuth } from './js/auth.js';
-    import { initTrips, loadTrips } from './js/trips.js';
-    import { initFlights, loadFlights } from './js/flights.js';
-    import { initStays, loadStays } from './js/stays.js';
-    import { initTransport, loadTransport } from './js/transport.js';
-    import { initExpenses, loadExpenses } from './js/expenses.js';
-    import { initPhotos, loadPhotos } from './js/photos.js';
-    import { initPosts, loadPosts } from './js/posts.js';
-    import { initAi, loadAi } from './js/ai.js';
+    import { initAuth } from './js/auth.js?v=5';
+    import { initTrips, loadTrips } from './js/trips.js?v=5';
+    import { initFlights, loadFlights } from './js/flights.js?v=5';
+    import { initStays, loadStays } from './js/stays.js?v=5';
+    import { initTransport, loadTransport } from './js/transport.js?v=5';
+    import { initExpenses, loadExpenses } from './js/expenses.js?v=5';
+    import { initPhotos, loadPhotos } from './js/photos.js?v=5';
+    import { initPosts, loadPosts } from './js/posts.js?v=5';
+    import { initAi, loadAi } from './js/ai.js?v=5';
 
     const loginView = document.getElementById('login-view');
     const appView = document.getElementById('app-view');

@@ -139,6 +139,35 @@ textarea { min-height: 7.5rem; resize: vertical; line-height: 1.6; }
 .photo-actions button { padding: .2rem .6rem; font-size: .8rem; }
 .ai-box { border: 1.5px dashed var(--accent); background: #fdf6f0; }
 
+/* AI 狀態列：失敗一定顯示明確訊息（紅底），成功綠字 */
+.ai-error {
+  color: #fff !important;
+  background: var(--danger);
+  padding: .25rem .6rem;
+  border-radius: 6px;
+  font-size: .85rem;
+}
+.ai-ok { color: #2e7d5b !important; font-weight: 700; }
+
+/* 封面照挑選器 */
+.cover-fieldset { border: 1px dashed var(--line); border-radius: 8px; }
+.cover-thumbs { display: flex; flex-wrap: wrap; gap: .5rem; }
+.cover-thumb {
+  padding: 0;
+  width: 88px;
+  height: 66px;
+  border: 2px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+  background: none;
+  cursor: pointer;
+}
+.cover-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cover-thumb.selected { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.cover-advanced { margin-top: .6rem; font-size: .85rem; }
+.cover-advanced summary { cursor: pointer; color: var(--main); }
+.cover-advanced input { margin-top: .4rem; width: 100%; }
+
 a.btn-link {
   display: inline-block;
   padding: .35rem .8rem;

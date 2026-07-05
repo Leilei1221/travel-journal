@@ -30,6 +30,10 @@
 3. 前臺半公開 = noindex + 不做密碼鎖（維持 FB 分享預覽）
 4. AI 遊記只產草稿，必經人工確認才發布
 
+## 快取版本控制（重要）
+
+前臺與後臺的 CSS/JS 皆以 `?v=N` 版本參數載入（`front.css`、`admin.css`、所有 JS module import 與入口 script）。**改動 CSS/JS 後務必同步遞增版本號**（目前 v5），否則使用者瀏覽器會在 GitHub Pages 10 分鐘快取內載到舊檔造成「改了沒反應」。
+
 ## 進度
 
 - Phase 1：✅ 建表＋RLS ✅ 後臺登入 ✅ 航班/住宿/交通卡片手動輸入 ✅ 照片上傳（前端壓縮）✅ GitHub repo＋keep-alive
@@ -40,7 +44,8 @@
   - 追加：✅ 照片打卡位置（location_name＋GPS 座標，後臺「用目前位置打卡」；前臺照片牆 📍 Maps 連結）
   - 待辦：Google Places 住宿/景點抓取（§9）
 - Phase 3：✅ Edge Function `gemini-draft`（金鑰只在函式環境變數、驗證登入、鏡像檔 `supabase/functions/gemini-draft/index.ts`）✅ AI 遊記草稿＋歷史行程回填（後臺文章頁籤「AI 草稿助手」，產出填入表單為草稿、原文存 ai_draft）✅ FB 貼文產生器（自動附前臺連結，複製貼上發文）✅ 旅程專屬背景插畫（mode: background 用 gemini-2.5-flash-image 依目的地＋主題色生成；後臺旅程編輯「生成→預覽→套用」，存 Storage backgrounds/{tripId}.webp＋trips.bg_image_url；前臺以 --bg-image CSS 變數覆寫，未設定用預設 bg-doodle）
-- Phase 4（本階段）：✅ 航班狀態查詢（後臺航班卡「查航班狀態」開 Google 即時航班資訊，零 API 費用）✅ A5 PDF 小書（`book.html?id=`＋book.css/book.js：154×216mm 含 3mm 出血、封面/行程/遊記/照片牆 2×2/封底、段落級自動分頁；後臺旅程卡「📖 小書」開啟，瀏覽器「另存為 PDF、邊界無、含背景圖形」匯出）✅ Gmail 異動信解析流程（見下）
+- 修補：✅ AI 功能失敗一律於按鈕旁顯示紅底錯誤訊息（不再只靠可能捲出畫面的 toast）✅ 封面照改縮圖挑選器（保留貼網址進階）✅ 照片牆重整（排除住宿/文章關聯照，依打卡地點分組、精選 1–2 張＋收合，配圖直接顯示於文章內）✅ 全站 CSS/JS 加 ?v= 版本參數解決快取
+- Phase 4：✅ 航班狀態查詢（後臺航班卡「查航班狀態」開 Google 即時航班資訊，零 API 費用）✅ A5 PDF 小書（`book.html?id=`＋book.css/book.js：154×216mm 含 3mm 出血、封面/行程/遊記/照片牆 2×2/封底、段落級自動分頁；後臺旅程卡「📖 小書」開啟，瀏覽器「另存為 PDF、邊界無、含背景圖形」匯出）✅ Gmail 異動信解析流程（見下）
 
 ## Gmail 航班異動信解析（Phase 4 操作程序，非程式碼）
 

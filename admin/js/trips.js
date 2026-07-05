@@ -1,12 +1,13 @@
 // Trip 建立、編輯與選取
-import { supabase, esc, toast } from './supabase-client.js';
-import { callGemini } from './ai.js';
+import { supabase, esc, toast } from './supabase-client.js?v=5';
+import { callGemini, setAiStatus } from './ai.js?v=5';
 
 const STATUS_LABEL = { planning: '規劃中', traveling: '旅途中', done: '已完成' };
 let onSelectTrip = () => {};
 let editingId = null;
 let editingTrip = null;
 let pendingBgDataUrl = null; // 生成後待套用的背景（人工確認才上傳）
+let selectedCoverUrl = null; // 從照片挑選的封面（進階網址欄優先）
 
 export function initTrips(handler) {
   onSelectTrip = handler;
@@ -18,6 +19,40 @@ export function initTrips(handler) {
   document.getElementById('trip-bg-clear').addEventListener('click', clearBg);
 }
 
+// ── 封面照：從該旅程已上傳照片中挑選（縮圖點選）──────────
+async function loadCoverThumbs(currentUrl) {
+  const box = document.getElementById('cover-box');
+  const thumbsEl = document.getElementById('cover-thumbs');
+  const emptyEl = document.getElementById('cover-empty');
+  box.hidden = !editingId;
+  if (!editingId) return;
+
+  selectedCoverUrl = currentUrl ?? null;
+  const { data } = await supabase
+    .from('photos').select('src_url, caption')
+    .eq('trip_id', editingId)
+    .order('taken_on', { nullsFirst: false }).order('sort_order');
+  emptyEl.hidden = !!data?.length;
+  thumbsEl.innerHTML = (data ?? []).map(p => `
+    <button type="button" class="cover-thumb ${p.src_url === currentUrl ? 'selected' : ''}"
+      data-url="${esc(p.src_url)}" title="${esc(p.caption ?? '')}">
+      <img src="${esc(p.src_url)}" alt="${esc(p.caption ?? '照片')}" loading="lazy">
+    </button>`).join('');
+
+  thumbsEl.querySelectorAll('.cover-thumb').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const url = btn.dataset.url;
+      // 再按一次取消挑選
+      const already = btn.classList.contains('selected');
+      thumbsEl.querySelectorAll('.cover-thumb').forEach(b => b.classList.remove('selected'));
+      selectedCoverUrl = already ? null : url;
+      if (!already) btn.classList.add('selected');
+      // 挑選照片時清掉進階網址欄，避免衝突
+      document.getElementById('trip-form').elements.cover_photo_url.value = '';
+    });
+  });
+}
+
 // ── AI 專屬背景插畫（§7：依主題色生成，人工確認才套用）──
 function resetBgBox() {
   pendingBgDataUrl = null;
@@ -25,8 +60,8 @@ function resetBgBox() {
   document.getElementById('trip-bg-preview').hidden = true;
   document.getElementById('trip-bg-apply').hidden = true;
   document.getElementById('trip-bg-clear').hidden = !editingTrip?.bg_image_url;
-  document.getElementById('trip-bg-status').textContent =
-    editingTrip?.bg_image_url ? '目前已有專屬背景' : '';
+  setAiStatus(document.getElementById('trip-bg-status'),
+    editingTrip?.bg_image_url ? '目前已有專屬背景' : '');
 }
 
 async function generateBg() {
@@ -34,7 +69,7 @@ async function generateBg() {
   const btn = document.getElementById('trip-bg-generate');
   const status = document.getElementById('trip-bg-status');
   btn.disabled = true;
-  status.textContent = 'AI 繪製中…（約 20–40 秒）';
+  setAiStatus(status, 'AI 繪製中…（約 20–40 秒，請稍候）');
   try {
     const { image, mimeType } = await callGemini('background', {
       destination: f.elements.destination.value || f.elements.title.value,
@@ -47,9 +82,9 @@ async function generateBg() {
     preview.src = pendingBgDataUrl;
     preview.hidden = false;
     document.getElementById('trip-bg-apply').hidden = false;
-    status.textContent = '預覽如上——滿意按「套用」，不滿意可再生成';
+    setAiStatus(status, '預覽如上——滿意按「套用」，不滿意可再生成');
   } catch (err) {
-    status.textContent = '';
+    setAiStatus(status, '⚠ 背景生成失敗：' + err.message, 'error');
     toast('背景生成失敗：' + err.message, true);
   } finally {
     btn.disabled = false;
@@ -59,7 +94,7 @@ async function generateBg() {
 async function applyBg() {
   if (!pendingBgDataUrl || !editingId) return;
   const status = document.getElementById('trip-bg-status');
-  status.textContent = '壓縮並上傳中…';
+  setAiStatus(status, '壓縮並上傳中…');
   try {
     // dataURL → canvas → webp（目標 ≤ 400KB）
     const img = new Image();
@@ -84,9 +119,10 @@ async function applyBg() {
     if (error) throw error;
     editingTrip.bg_image_url = url;
     resetBgBox();
-    toast('專屬背景已套用，前臺內頁生效');
+    setAiStatus(status, '✓ 專屬背景已套用，前臺內頁生效', 'ok');
+    toast('專屬背景已套用');
   } catch (err) {
-    status.textContent = '';
+    setAiStatus(status, '⚠ 套用失敗：' + err.message, 'error');
     toast('套用失敗：' + err.message, true);
   }
 }
@@ -151,14 +187,18 @@ function fillForm(trip) {
   f.elements.theme_paper.value = trip.theme?.['--paper'] ?? '#faf6ee';
   document.getElementById('trip-form-title').textContent = '編輯旅程：' + trip.title;
   resetBgBox();
+  loadCoverThumbs(trip.cover_photo_url);
   f.scrollIntoView({ behavior: 'smooth' });
 }
 
 function resetForm() {
   editingId = null;
   editingTrip = null;
+  selectedCoverUrl = null;
   document.getElementById('trip-form').reset();
   document.getElementById('trip-form-title').textContent = '新增旅程';
+  document.getElementById('cover-box').hidden = true;
+  document.getElementById('cover-thumbs').innerHTML = '';
   resetBgBox();
 }
 
@@ -172,7 +212,8 @@ async function saveTrip(e) {
     end_date: f.elements.end_date.value || null,
     status: f.elements.status.value,
     is_public: f.elements.is_public.checked,
-    cover_photo_url: f.elements.cover_photo_url.value.trim() || null,
+    // 進階網址欄優先；否則用縮圖挑選的封面
+    cover_photo_url: f.elements.cover_photo_url.value.trim() || selectedCoverUrl || null,
     theme: {
       '--main': f.elements.theme_main.value,
       '--accent': f.elements.theme_accent.value,

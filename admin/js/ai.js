@@ -1,11 +1,18 @@
 // AI 草稿助手（Phase 3）— 呼叫 gemini-draft Edge Function
 // 金鑰在伺服器端；這裡只送素材、收草稿。產生的內容一律進「草稿」，人工確認才發布。
-import { supabase, SUPABASE_URL, SUPABASE_KEY, toast } from './supabase-client.js';
-import { setPendingAiDraft } from './posts.js';
+import { supabase, SUPABASE_URL, SUPABASE_KEY, toast } from './supabase-client.js?v=5';
+import { setPendingAiDraft } from './posts.js?v=5';
 
 const FRONT_BASE = 'https://leilei1221.github.io/travel-journal';
 
 let trip = null;
+
+// 統一在按鈕旁的狀態列顯示訊息（AI 失敗必顯示明確錯誤，不再只靠可能捲出畫面的 toast）
+export function setAiStatus(el, msg, kind = 'info') {
+  el.textContent = msg;
+  el.classList.toggle('ai-error', kind === 'error');
+  el.classList.toggle('ai-ok', kind === 'ok');
+}
 
 export function initAi() {
   document.getElementById('ai-journal-btn').addEventListener('click', () => generateDraft('journal'));
@@ -64,7 +71,7 @@ async function generateDraft(mode) {
   if (!notes) { toast('請先填入素材', true); return; }
   const btns = ['ai-journal-btn', 'ai-backfill-btn'].map(id => document.getElementById(id));
   btns.forEach(b => b.disabled = true);
-  statusEl.textContent = 'AI 書寫中…（約 10–30 秒）';
+  setAiStatus(statusEl, 'AI 書寫中…（約 10–30 秒）');
   try {
     const context = document.getElementById('ai-include-context').checked ? await tripContext() : '';
     const { text } = await callGemini(mode, context, notes);
@@ -76,11 +83,11 @@ async function generateDraft(mode) {
     f.elements.status.value = 'draft';
     if (mode === 'backfill') f.elements.post_type.value = 'daily';
     setPendingAiDraft(text); // 原文存入 ai_draft 欄位供日後對照
-    statusEl.textContent = '';
-    toast('草稿已填入下方文章表單，請確認潤飾後儲存');
+    setAiStatus(statusEl, '✓ 草稿已填入下方文章表單，請確認潤飾後儲存', 'ok');
+    toast('草稿已填入下方文章表單');
     f.scrollIntoView({ behavior: 'smooth' });
   } catch (err) {
-    statusEl.textContent = '';
+    setAiStatus(statusEl, '⚠ AI 產生失敗：' + err.message, 'error');
     toast('AI 產生失敗：' + err.message, true);
   } finally {
     btns.forEach(b => b.disabled = false);
@@ -93,14 +100,14 @@ async function generateFb() {
   const btn = document.getElementById('ai-fb-btn');
   if (!notes) { toast('請先貼上要宣傳的文章內容或重點', true); return; }
   btn.disabled = true;
-  statusEl.textContent = '小編撰寫中…';
+  setAiStatus(statusEl, '小編撰寫中…');
   try {
     const context = `前臺連結：${FRONT_BASE}/trip.html?id=${trip.id}`;
     document.getElementById('ai-fb-result').value = (await callGemini('fb', context, notes)).text;
-    statusEl.textContent = '';
-    toast('FB 貼文已產生，複製後貼到粉專即可');
+    setAiStatus(statusEl, '✓ 已產生，複製後貼到粉專即可', 'ok');
+    toast('FB 貼文已產生');
   } catch (err) {
-    statusEl.textContent = '';
+    setAiStatus(statusEl, '⚠ AI 產生失敗：' + err.message, 'error');
     toast('AI 產生失敗：' + err.message, true);
   } finally {
     btn.disabled = false;

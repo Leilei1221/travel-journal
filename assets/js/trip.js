@@ -1,6 +1,6 @@
 // 旅程內頁：per-trip 主題色＋四頁籤（故事/行程/照片/筆記）
 // 只查公開表；私人表（*_private、expenses）永不撈取
-import { supabase, esc, textToHtml, dateRange, mapsUrl } from './front-client.js';
+import { supabase, esc, textToHtml, dateRange, mapsUrl } from './front-client.js?v=5';
 
 const POST_TYPE_LABEL = { pretrip: '行前情報', daily: '每日遊記', summary: '旅程總結' };
 
@@ -70,34 +70,55 @@ function initTabs() {
 async function loadStory() {
   const { data } = await supabase
     .from('posts')
-    .select('post_type, title, content, post_date')
+    .select('id, post_type, title, content, post_date')
     .eq('trip_id', tripId)
     .eq('status', 'published')
     .in('post_type', ['pretrip', 'daily'])
     .order('post_date', { nullsFirst: true });
-  renderPosts(document.getElementById('panel-story'), data, '這趟旅程的故事還在書寫中…');
+  await renderPosts(document.getElementById('panel-story'), data, '這趟旅程的故事還在書寫中…');
 }
 
 async function loadNotes() {
   const { data } = await supabase
     .from('posts')
-    .select('post_type, title, content, post_date')
+    .select('id, post_type, title, content, post_date')
     .eq('trip_id', tripId)
     .eq('status', 'published')
     .eq('post_type', 'summary')
     .order('post_date', { nullsFirst: true });
-  renderPosts(document.getElementById('panel-notes'), data, '旅行筆記還沒寫好，回來再看看吧。');
+  await renderPosts(document.getElementById('panel-notes'), data, '旅行筆記還沒寫好，回來再看看吧。');
 }
 
-function renderPosts(el, posts, emptyText) {
-  el.innerHTML = posts?.length
-    ? posts.map(p => `
+// 取這些文章的配圖，依 post_id 分組
+async function postPhotoMap(postIds) {
+  if (!postIds.length) return {};
+  const { data } = await supabase
+    .from('photos').select('src_url, caption, post_id')
+    .eq('trip_id', tripId).in('post_id', postIds).order('sort_order');
+  const map = {};
+  for (const p of data ?? []) (map[p.post_id] ??= []).push(p);
+  return map;
+}
+
+function postPhotosHtml(list) {
+  if (!list?.length) return '';
+  return `<div class="post-photos">${list.map(p => `
+    <figure>
+      <img src="${esc(p.src_url)}" alt="${esc(p.caption ?? '文章配圖')}" loading="lazy">
+      ${p.caption ? `<figcaption>${esc(p.caption)}</figcaption>` : ''}
+    </figure>`).join('')}</div>`;
+}
+
+async function renderPosts(el, posts, emptyText) {
+  if (!posts?.length) { el.innerHTML = `<p class="empty-note">${emptyText}</p>`; return; }
+  const photoMap = await postPhotoMap(posts.map(p => p.id));
+  el.innerHTML = posts.map(p => `
       <article class="post">
         <h3>${esc(p.title ?? POST_TYPE_LABEL[p.post_type])}</h3>
         <div class="post-date">${esc(POST_TYPE_LABEL[p.post_type])}${p.post_date ? `・${esc(p.post_date.replaceAll('-', '.'))}` : ''}</div>
         <div class="post-body">${textToHtml(p.content ?? '')}</div>
-      </article>`).join('')
-    : `<p class="empty-note">${emptyText}</p>`;
+        ${postPhotosHtml(photoMap[p.id])}
+      </article>`).join('');
 }
 
 async function loadPlan() {
@@ -189,24 +210,65 @@ function photoLocation(p) {
   return `<a class="photo-loc" href="${esc(url)}" target="_blank" rel="noopener">📍 ${esc(p.location_name ?? '打卡點')}</a>`;
 }
 
+function polaroidHtml(p) {
+  return `
+    <figure class="polaroid" style="margin:0">
+      <img src="${esc(p.src_url)}" alt="${esc(p.caption ?? '旅行照片')}" loading="lazy">
+      <figcaption>
+        <div class="place">${esc(p.caption ?? '')}</div>
+        <div class="meta"><span>${photoLocation(p)}</span><span>${esc(p.taken_on?.replaceAll('-', '.') ?? '')}</span></div>
+      </figcaption>
+    </figure>`;
+}
+
+const FEATURED_PER_GROUP = 2; // 每個打卡點預設精選張數
+
 async function loadPhotos() {
   const el = document.getElementById('panel-photos');
+  // 照片牆只收「未關聯住宿、未配圖到文章」的照片（那些已在住宿卡相簿 / 文章內顯示）
   const { data } = await supabase
     .from('photos')
-    .select('src_url, caption, taken_on, location_name, lat, lng')
+    .select('src_url, caption, taken_on, location_name, lat, lng, is_featured')
     .eq('trip_id', tripId)
+    .is('stay_id', null)
+    .is('post_id', null)
     .order('taken_on', { nullsFirst: false })
     .order('sort_order');
-  el.innerHTML = data?.length
-    ? `<div class="polaroid-grid">${data.map(p => `
-        <figure class="polaroid" style="margin:0">
-          <img src="${esc(p.src_url)}" alt="${esc(p.caption ?? '旅行照片')}" loading="lazy">
-          <figcaption>
-            <div class="place">${esc(p.caption ?? '')}</div>
-            <div class="meta"><span>${photoLocation(p)}</span><span>${esc(p.taken_on?.replaceAll('-', '.') ?? '')}</span></div>
-          </figcaption>
-        </figure>`).join('')}</div>`
-    : '<p class="empty-note">照片還在沖洗中…📷</p>';
+
+  if (!data?.length) { el.innerHTML = '<p class="empty-note">照片還在沖洗中…📷</p>'; return; }
+
+  // 依打卡地點分組（無地點 → 其他），精選照排前面
+  const groups = new Map();
+  for (const p of data) {
+    const key = p.location_name || '其他';
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(p);
+  }
+  for (const list of groups.values()) list.sort((a, b) => (b.is_featured ? 1 : 0) - (a.is_featured ? 1 : 0));
+
+  let gi = 0;
+  el.innerHTML = [...groups.entries()].map(([loc, list]) => {
+    const shown = list.slice(0, FEATURED_PER_GROUP);
+    const hidden = list.slice(FEATURED_PER_GROUP);
+    const gid = `pg-${gi++}`;
+    return `
+      <section class="photo-group">
+        <h3 class="photo-group-title">📍 ${esc(loc)} <span class="muted">（${list.length} 張）</span></h3>
+        <div class="polaroid-grid">${shown.map(polaroidHtml).join('')}</div>
+        ${hidden.length ? `
+          <div class="polaroid-grid photo-more" id="${gid}" hidden>${hidden.map(polaroidHtml).join('')}</div>
+          <button type="button" class="btn-more" data-target="${gid}">＋ 展開其餘 ${hidden.length} 張</button>
+        ` : ''}
+      </section>`;
+  }).join('');
+
+  el.querySelectorAll('.btn-more').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const more = document.getElementById(btn.dataset.target);
+      more.hidden = false;
+      btn.remove();
+    });
+  });
 }
 
 init();

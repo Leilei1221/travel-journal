@@ -1,5 +1,5 @@
 // 交通卡片 CRUD — 接送/租機車/火車/渡輪等，前臺以醒目資訊框呈現（PLAN.md §3）
-import { supabase, esc, toast } from './supabase-client.js';
+import { supabase, esc, toast } from './supabase-client.js?v=5';
 
 let tripId = null;
 let editingId = null;
