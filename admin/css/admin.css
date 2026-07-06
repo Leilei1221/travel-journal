@@ -307,3 +307,52 @@ fieldset { border: 1px dashed var(--line); border-radius: 8px; display: grid; ga
   z-index: 99;
 }
 .toast-error { background: var(--danger); }
+
+/* ── 全域防呆：按鈕/連結/徽章/頁籤文字一律水平，不逐字直排 ── */
+button, .btn-link, .badge, .chip, .auto-badge, .tab, .weather-retry { white-space: nowrap; }
+
+/* ── 手機版（≤480px）版面優化：純樣式，不動邏輯 ── */
+@media (max-width: 480px) {
+  /* 頁首：上下堆疊，標題不斷行 */
+  .topbar { flex-direction: column; align-items: flex-start; gap: .4rem; padding: .7rem 1rem; }
+  .topbar h1 { white-space: nowrap; font-size: 1.15rem; }
+  .topbar > div { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+  #user-email { font-size: .78rem; word-break: break-all; }
+
+  .current-trip-bar { padding: .5rem 1rem; }
+
+  /* 頁籤：可橫向捲動的一排，文字水平不直排 */
+  .tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: .2rem;
+    padding: .5rem .8rem 0;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { flex: 0 0 auto; padding: .45rem .7rem; font-size: .9rem; }
+
+  .tab-panel { padding: 1rem .8rem 4rem; }
+
+  /* 清單卡片：改上下堆疊，操作列移到底部橫排（不再擠壓內文成直排） */
+  .card { flex-direction: column; align-items: stretch; gap: .6rem; }
+  .card-actions { flex-shrink: 1; flex-wrap: wrap; }
+
+  /* 照片卡說明：說明在上、按鈕在下 */
+  .photo-item figcaption { flex-direction: column; align-items: flex-start; gap: .3rem; }
+
+  /* 天氣卡：輸入框佔整行、按鈕不擠 */
+  .weather-card { margin: .8rem 1rem 0; }
+  .weather-city-form { flex-wrap: wrap; }
+  .weather-city-form input { flex: 1 1 100%; }
+  .weather-days { gap: .6rem; }
+
+  /* 每日行程自動帶入列：允許換行、徽章不再靠右擠壓文字 */
+  .auto-row { align-items: flex-start; }
+  .auto-badge { margin-left: 0; }
+
+  /* 表單操作鈕換行 */
+  .form-actions { flex-wrap: wrap; }
+  .form-grid { padding: .8rem; }
+}

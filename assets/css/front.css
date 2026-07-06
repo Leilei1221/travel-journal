@@ -469,12 +469,28 @@ section { padding: 2.2rem 0; }
   margin-top: 2rem;
 }
 
+/* 全域防呆：徽章/標籤/連結類文字水平，不逐字直排 */
+.badge-plan, .chip, .maps-link, .photo-loc, .btn-hand { white-space: nowrap; }
+
 /* ── 響應式 ───────────────────────────────────────── */
 @media (max-width: 768px) {
   .hero { grid-template-columns: 1fr; gap: 1.8rem; padding: 1.5rem 0 2.2rem; }
   .hero-photo { order: -1; }
   .polaroid-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1.4rem 1rem; }
   .trip-hero { min-height: 230px; border-radius: 12px; }
+}
+
+@media (max-width: 480px) {
+  .container { padding: 0 .9rem; }
+  /* 導覽列可橫向捲動一排，項目不直排 */
+  .site-nav { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .site-nav::-webkit-scrollbar { display: none; }
+  .site-nav a { flex: 0 0 auto; white-space: nowrap; padding: .4rem .5rem; }
+  /* 照片牆縮圖再縮一級，避免圖說被擠 */
+  .polaroid-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  /* 每日時間軸：住宿卡按鈕換行不擠壓 */
+  .plan-stay { line-height: 1.6; }
+  .plan-day-head { font-size: 1.2rem; }
 }
 
 /* 動態偏好：減少動態時停用傾斜與位移 */

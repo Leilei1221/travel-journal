@@ -1,5 +1,5 @@
 // 航班 CRUD — 公開欄位存 flights，訂位代號等私人欄位存 flight_private（RLS 僅本人）
-import { supabase, esc, toast, isoToLocal, localToIso } from './supabase-client.js?v=9';
+import { supabase, esc, toast, isoToLocal, localToIso } from './supabase-client.js?v=10';
 
 let tripId = null;
 let editingId = null;
