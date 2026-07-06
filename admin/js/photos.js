@@ -1,7 +1,7 @@
 // 照片上傳與管理 — 前端壓縮（長邊 1600px、目標 ≤ 350KB，PLAN.md §6）後傳 Supabase Storage
 // photos.src_url 存公開網址：日後搬遷 R2 只改網址、不改程式
 // 照片可選擇性關聯到住宿（住宿介紹照片；前臺跟隨該住宿的公開時機）
-import { supabase, esc, toast } from './supabase-client.js?v=7';
+import { supabase, esc, toast } from './supabase-client.js?v=9';
 
 const MAX_EDGE = 1600;
 const TARGET_BYTES = 350 * 1024;
@@ -15,6 +15,9 @@ export function initPhotos() {
   document.getElementById('photo-edit-cancel').addEventListener('click', cancelEdit);
   wireCheckin(document.getElementById('photo-form'));
   wireCheckin(document.getElementById('photo-edit-form'));
+  // 選文章時，聯動顯示「段落位置」下拉
+  document.querySelectorAll('select[name="photo_post"]').forEach(sel =>
+    sel.addEventListener('change', () => syncParagraphSelect(sel.form)));
 }
 
 // ── GPS 打卡（旅途中隨手記美食/景點位置） ─────────────
@@ -58,14 +61,39 @@ async function loadStayOptions() {
   document.querySelectorAll('select[name="photo_stay"]').forEach(sel => sel.innerHTML = options);
 }
 
-// 「配圖到文章」下拉
+// 「配圖到文章」下拉＋段落錨點：快取每篇文章的段落，供選「釘在第幾段之後」
+const postParagraphs = new Map(); // postId → string[]（段落）
+
+function splitParagraphs(content) {
+  return String(content ?? '').split(/\n{2,}/).map(s => s.trim()).filter(Boolean);
+}
+
 async function loadPostOptions() {
+  postParagraphs.clear();
   const { data } = await supabase
-    .from('posts').select('id, title, post_type').eq('trip_id', tripId)
+    .from('posts').select('id, title, post_type, content').eq('trip_id', tripId)
     .order('post_date', { nullsFirst: true });
   const options = '<option value="">（不關聯文章）</option>'
     + (data ?? []).map(p => `<option value="${p.id}">${esc(p.title ?? '（未命名）')}</option>`).join('');
+  for (const p of data ?? []) postParagraphs.set(p.id, splitParagraphs(p.content));
   document.querySelectorAll('select[name="photo_post"]').forEach(sel => sel.innerHTML = options);
+  document.querySelectorAll('form').forEach(f => syncParagraphSelect(f)); // 初始隱藏
+}
+
+// 依所選文章填入段落下拉（第 N 段之後 / 文末）；未選文章則隱藏
+function syncParagraphSelect(form, selectedIdx) {
+  const postSel = form.elements?.photo_post;
+  const paraLabel = form.querySelector?.('.photo-paragraph');
+  if (!postSel || !paraLabel) return;
+  const paras = postParagraphs.get(postSel.value);
+  if (!postSel.value || !paras) { paraLabel.hidden = true; return; }
+  paraLabel.hidden = false;
+  const end = paras.length; // 文末錨點索引 = 段數
+  const snip = s => s.length > 16 ? s.slice(0, 16) + '…' : s;
+  paraLabel.querySelector('select').innerHTML =
+    paras.map((s, i) => `<option value="${i}">第 ${i + 1} 段之後：${esc(snip(s))}</option>`).join('')
+    + `<option value="${end}">文末（文章結尾）</option>`;
+  paraLabel.querySelector('select').value = selectedIdx != null ? selectedIdx : end;
 }
 
 async function loadList() {
@@ -137,6 +165,8 @@ async function uploadPhotos(e) {
   const caption = f.elements.caption.value.trim() || null;
   const stayId = f.elements.photo_stay.value || null;
   const postId = f.elements.photo_post.value || null;
+  const postParagraph = postId && !f.querySelector('.photo-paragraph').hidden
+    ? Number(f.elements.photo_paragraph.value) : null;
   const locationName = f.elements.location_name.value.trim() || null;
   const lat = f.elements.lat.value === '' ? null : Number(f.elements.lat.value);
   const lng = f.elements.lng.value === '' ? null : Number(f.elements.lng.value);
@@ -163,6 +193,7 @@ async function uploadPhotos(e) {
         caption,
         stay_id: stayId,
         post_id: postId,
+        post_paragraph: postParagraph,
         location_name: locationName,
         lat,
         lng,
@@ -193,6 +224,7 @@ function startEdit(p) {
   f.elements.taken_on.value = p.taken_on ?? '';
   f.elements.photo_stay.value = p.stay_id ?? '';
   f.elements.photo_post.value = p.post_id ?? '';
+  syncParagraphSelect(f, p.post_paragraph);
   f.elements.location_name.value = p.location_name ?? '';
   f.elements.is_featured.checked = !!p.is_featured;
   setCheckin(f, p.lat, p.lng);
@@ -209,11 +241,14 @@ async function saveEdit(e) {
   e.preventDefault();
   if (!editingId) return;
   const f = e.target;
+  const postId = f.elements.photo_post.value || null;
   const { error } = await supabase.from('photos').update({
     caption: f.elements.caption.value.trim() || null,
     taken_on: f.elements.taken_on.value || null,
     stay_id: f.elements.photo_stay.value || null,
-    post_id: f.elements.photo_post.value || null,
+    post_id: postId,
+    post_paragraph: postId && !f.querySelector('.photo-paragraph').hidden
+      ? Number(f.elements.photo_paragraph.value) : null,
     location_name: f.elements.location_name.value.trim() || null,
     is_featured: f.elements.is_featured.checked,
     lat: f.elements.lat.value === '' ? null : Number(f.elements.lat.value),

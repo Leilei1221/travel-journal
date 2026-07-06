@@ -155,30 +155,106 @@ body {
 .post-title { font-family: var(--hand); font-weight: 400; font-size: 13pt; margin: 0 0 1mm; }
 .post-date { font-family: var(--hand); color: var(--ink-soft); font-size: 9pt; margin: 0 0 3mm; }
 
-/* ── 照片頁（拍立得 2×2） ──────────────────────────── */
-.photo-sheet-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6mm 5mm;
-  align-content: start;
+/* ── 章節扉頁（大照片＋標題＋充足留白，§7 照片是主角） ── */
+.sheet.chapter .safe { inset: 0; }         /* 扉頁大照片可滿版出血 */
+.sheet.chapter .chapter-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 72%;               /* 上方大照片，下方留白呼吸 */
+  object-fit: cover;
 }
-.print-polaroid {
+.sheet.chapter .chapter-photo-frame {
+  position: absolute;
+  top: 14mm; left: 12mm; right: 12mm;
+  height: 62%;
   background: #fff;
-  padding: 2mm 2mm 3mm;
-  box-shadow: 0 1px 3px rgba(61, 58, 52, .3);
-  break-inside: avoid;
+  padding: 3mm;
+  box-shadow: 0 3px 10px rgba(61, 58, 52, .28);
+  transform: rotate(-1.5deg);
 }
-.print-polaroid:nth-child(odd) { transform: rotate(-1.2deg); }
-.print-polaroid:nth-child(even) { transform: rotate(1deg); }
-.print-polaroid img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
-.print-polaroid figcaption {
+.sheet.chapter .chapter-photo-frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sheet.chapter .chapter-tape {
+  position: absolute;
+  top: 8mm; left: 50%;
+  width: 34mm; height: 11mm;
+  transform: translateX(-50%) rotate(-3deg);
+  background: color-mix(in srgb, var(--main) 42%, #fff);
+  opacity: .8;
+  z-index: 3;
+}
+.sheet.chapter .chapter-text {
+  position: absolute;
+  left: 14mm; right: 14mm; bottom: 22mm;
   font-family: var(--hand);
-  font-size: 8.5pt;
-  text-align: center;
-  padding-top: 1.5mm;
-  line-height: 1.4;
 }
-.print-polaroid .loc { color: var(--accent); font-size: 7.5pt; }
+.sheet.chapter .chapter-text h2 { font-size: 22pt; font-weight: 400; margin: 0 0 2mm; color: var(--accent); }
+.sheet.chapter .chapter-text p { font-size: 11pt; color: var(--ink-soft); margin: 0; }
+
+/* ── 照片拼貼頁（錯落、大小交錯、微傾斜；絕對定位確保不跨頁裁切） ── */
+.collage { position: relative; width: 100%; height: 100%; }
+.collage .sheet-title { position: absolute; top: 0; left: 0; right: 0; z-index: 4; }
+
+.snap {                          /* 一張拍立得（白框＋陰影＋傾斜） */
+  position: absolute;
+  background: #fff;
+  padding: 2mm 2mm 2.5mm;
+  box-shadow: 0 2px 6px rgba(61, 58, 52, .3);
+}
+.snap img { width: 100%; object-fit: cover; display: block; background: var(--line); }
+.snap figcaption {
+  font-family: var(--hand);
+  font-size: 8pt;
+  line-height: 1.35;
+  text-align: center;
+  padding-top: 1mm;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;     /* 圖說最多兩行，避免撐破拼貼版位 */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.snap .loc { color: var(--accent); font-size: 7pt; }
+
+/* 手帳裝飾（點綴、不搶主角）：紙膠帶、郵戳圓章 */
+.snap.tape-tl::before, .snap.tape-tr::before {
+  content: '';
+  position: absolute;
+  width: 20mm; height: 7mm;
+  background: color-mix(in srgb, var(--main) 40%, #fff);
+  opacity: .78;
+  z-index: 2;
+}
+.snap.tape-tl::before { top: -3mm; left: -2mm; transform: rotate(-24deg); }
+.snap.tape-tr::before { top: -3mm; right: -2mm; transform: rotate(22deg); }
+.snap.tape-accent::before { background: color-mix(in srgb, var(--accent) 42%, #fff); }
+.snap.stamp::after {         /* 郵戳圓章 */
+  content: '';
+  position: absolute;
+  bottom: 6mm; right: -4mm;
+  width: 12mm; height: 12mm;
+  border: 1.5px dashed color-mix(in srgb, var(--accent) 65%, #fff);
+  border-radius: 50%;
+  opacity: .7;
+  z-index: 2;
+}
+
+/* ── 圖文穿插：內嵌拍立得（在文字流中，非絕對定位） ── */
+.inline-photos {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 7mm;
+  margin: 3mm 0 4.5mm;
+  break-inside: avoid;   /* 圖組不跨頁 */
+}
+.inline-photos .snap {
+  position: relative;    /* 覆蓋拼貼的絕對定位；裝飾 ::before/::after 仍相對於此 */
+  width: 58%;
+}
+.inline-photos.count-2 .snap { width: 45%; }
+.inline-photos .snap img { aspect-ratio: 4 / 3; }
+.inline-photos .snap:nth-child(1) { transform: rotate(-2deg); }
+.inline-photos .snap:nth-child(2) { transform: rotate(1.8deg); }
 
 /* ── 封底 ─────────────────────────────────────────── */
 .sheet.backcover { background: linear-gradient(200deg, color-mix(in srgb, var(--accent) 14%, var(--paper)), var(--paper) 55%); }

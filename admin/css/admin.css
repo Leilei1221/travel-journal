@@ -266,18 +266,33 @@ fieldset { border: 1px dashed var(--line); border-radius: 8px; display: grid; ga
 .weather-day-label { font-weight: 700; }
 .weather-range { color: #8a8578; }
 
-/* 行程規劃：依日期分組的時間線 */
-.itinerary-day-group { margin-bottom: 1.2rem; }
-.itinerary-day-label {
-  font-size: .95rem;
-  font-weight: 700;
-  color: var(--main);
-  border-bottom: 1px dashed var(--line);
-  padding-bottom: .2rem;
-  margin: 0 0 .5rem;
+/* 每日行程：一天一區塊 */
+.day-block { margin-bottom: 1.4rem; padding-bottom: .6rem; border-bottom: 1px solid var(--line); }
+.day-head { font-size: 1.05rem; color: var(--main); margin: 0 0 .5rem; }
+.day-head .muted { font-weight: 400; }
+.day-empty { font-size: .85rem; padding: .3rem 0 .6rem; }
+.auto-row {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  flex-wrap: wrap;
+  background: color-mix(in srgb, var(--main) 8%, #fff);
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  padding: .45rem .7rem;
+  margin-bottom: .5rem;
+  font-size: .9rem;
 }
-.itinerary-day-group .card { border-left: 3px solid var(--main); }
-.itinerary-day-group .card-body .btn-link { margin-top: .4rem; display: inline-block; }
+.auto-badge {
+  margin-left: auto;
+  font-size: .72rem;
+  background: var(--main);
+  color: #fff;
+  border-radius: 99px;
+  padding: .05rem .5rem;
+}
+.day-block .card { border-left: 3px solid var(--accent); }
+.day-block .card-body .btn-link { margin-top: .4rem; display: inline-block; }
 
 /* Toast */
 .toast {

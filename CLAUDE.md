@@ -48,7 +48,8 @@
 - Phase 4：✅ 航班狀態查詢（後臺航班卡「查航班狀態」開 Google 即時航班資訊，零 API 費用）✅ A5 PDF 小書（`book.html?id=`＋book.css/book.js：154×216mm 含 3mm 出血、封面/行程/遊記/照片牆 2×2/封底、段落級自動分頁；後臺旅程卡「📖 小書」開啟，瀏覽器「另存為 PDF、邊界無、含背景圖形」匯出）✅ Gmail 異動信解析流程（見下）
 - Phase 4 追加：✅ 後臺頂部天氣卡（`admin/js/weather.js`，Open-Meteo 免金鑰；瀏覽器定位優先，被拒則顯示城市輸入框改用 geocoding API）
   - ✅ 記帳拍收據辨識（`gemini-draft` Edge Function `receipt` mode，Gemini Vision 解析收據圖片回傳 JSON；前端壓縮至 1200px→base64→呼叫→預填記帳表單，仍需人工確認才儲存；**已部署 version 3**）
-  - ✅ 行程規劃務實版（表 `itinerary_items`：日期/時間標籤/地點/備註/GPS/Google Place ID/排序；後臺「行程」頁籤 CRUD＋相鄰兩站 Google Maps 大眾運輸路線連結；前臺 `trip.js` 的 `loadPlan()` 依日期分組顯示每日時間線＋相鄰站「🚇 前往下一站路線」連結，疊加在航班/住宿/交通卡片之上；**migration 0010 已套用**）
+  - ✅ 行程規劃 → **每日時間軸改版**（`assets/js/day-timeline.js` 後臺前臺共用）：依旅程起訖日拆第 1 天…第 N 天，後臺加景點用「第 N 天」下拉自動帶入 `item_date`；每天航班（依 depart_time 本地日期）＋住宿（依 check_in）**即時讀原表落位、不複製**，改原表自動同步；相鄰景點「🚇 前往下一站」大眾運輸連結；前臺空白日隱藏。表 `itinerary_items`（migration 0010 已套用）
+  - ✅ 小書圖文穿插（方案 A 段落錨點 `photos.post_paragraph`，migration 0011 已套用）＋手帳拼貼版式（見 PLAN §8）
 
 ## Gmail 航班異動信解析（Phase 4 操作程序，非程式碼）
 

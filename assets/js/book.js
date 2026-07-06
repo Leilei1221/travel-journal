@@ -1,6 +1,6 @@
 // A5 旅遊小書（PLAN.md §8）— 封面/行程/遊記/照片牆/封底，自動分頁
 // 資料權限：匿名只能匯出公開旅程；本人於同瀏覽器登入後臺後，可匯出未公開旅程
-import { supabase, esc, textToHtml, dateRange } from './front-client.js?v=5';
+import { supabase, esc, textToHtml, dateRange } from './front-client.js?v=9';
 
 const tripId = new URLSearchParams(location.search).get('id');
 const bookEl = document.getElementById('book');
@@ -66,10 +66,26 @@ async function init() {
     supabase.from('photos').select('*').eq('trip_id', tripId).order('taken_on', { nullsFirst: false }).order('sort_order'),
   ]);
 
-  renderCover(trip, photos.data);
+  const allPhotos = photos.data ?? [];
+  // 有段落錨點（post_id＋post_paragraph）→ 圖文穿插進遊記；
+  // 其餘（未配圖、或配圖但沒指定段落）→ 回退文末拼貼區
+  const isAnchored = p => p.post_id && p.post_paragraph != null;
+  const anchored = allPhotos.filter(isAnchored);
+  const freePhotos = allPhotos.filter(p => !isAnchored(p));
+
+  const coverSrc = trip.cover_photo_url ?? allPhotos[0]?.src_url ?? null;
+  renderCover(trip, allPhotos);
   renderItinerary(flights.data, stays.data, cards.data);
-  renderPosts(posts.data);
-  renderPhotos(photos.data);
+  if (posts.data?.length) {
+    renderChapterDivider(coverSrc, '旅程故事', trip.destination ?? '');
+    renderPosts(posts.data, anchored);
+  }
+  if (freePhotos.length) {
+    // 扉頁用一張與封面不同的照片（若有），讓章節有變化
+    const dividerPhoto = freePhotos.find(p => p.src_url !== coverSrc)?.src_url ?? freePhotos[0].src_url;
+    renderChapterDivider(dividerPhoto, '旅途照片', `${freePhotos.length} 個瞬間`);
+    renderPhotos(freePhotos);
+  }
   renderBackCover(trip);
 
   statusEl.textContent = `《${trip.title}》共 ${bookEl.querySelectorAll('.sheet').length} 頁`;
@@ -135,38 +151,119 @@ function renderItinerary(flights, stays, cards) {
   if (blocks.length) fillBlocks('<h2 class="sheet-title">行程安排</h2>', blocks);
 }
 
-// ── 遊記頁（已發布文章，段落級自動分頁） ─────────────
-function renderPosts(posts) {
+// 每個段落錨點最多 1–2 張精選；同地點重複不全放
+function pickInline(list) {
+  const sorted = [...list].sort((a, b) => (b.is_featured ? 1 : 0) - (a.is_featured ? 1 : 0));
+  const picked = [];
+  const seenLoc = new Set();
+  for (const p of sorted) {                 // 先湊不同地點
+    if (picked.length >= 2) break;
+    const loc = p.location_name || '';
+    if (loc && seenLoc.has(loc)) continue;
+    picked.push(p); seenLoc.add(loc);
+  }
+  for (const p of sorted) {                 // 不足 2 張再補
+    if (picked.length >= 2) break;
+    if (!picked.includes(p)) picked.push(p);
+  }
+  return picked;
+}
+
+// 圖文穿插用的內嵌拍立得區塊（1–2 張，手帳裝飾、微傾斜，在文字流中）
+function inlinePhotosBlock(list) {
+  const picked = pickInline(list);
+  if (!picked.length) return '';
+  return `<div class="inline-photos count-${picked.length}">${picked.map((p, i) => `
+    <figure class="snap ${['tape-tl', 'tape-tr tape-accent', 'stamp'][i % 3]}">
+      <img src="${esc(p.src_url)}" alt="${esc(p.caption ?? '照片')}">
+      ${p.caption || p.location_name ? `<figcaption>${esc(p.caption ?? '')}${p.location_name ? `<span class="loc"> 📍${esc(p.location_name)}</span>` : ''}</figcaption>` : ''}
+    </figure>`).join('')}</div>`;
+}
+
+// ── 遊記頁（圖文穿插：照片依段落錨點放進文字流；段落級自動分頁）──
+function renderPosts(posts, anchoredPhotos = []) {
   if (!posts?.length) return;
+  // 依 post_id → 段落索引 → 照片清單 分組
+  const byPost = new Map();
+  for (const ph of anchoredPhotos) {
+    if (!byPost.has(ph.post_id)) byPost.set(ph.post_id, new Map());
+    const m = byPost.get(ph.post_id);
+    const idx = ph.post_paragraph; // 已保證非 null；>= 段數＝文末
+    if (!m.has(idx)) m.set(idx, []);
+    m.get(idx).push(ph);
+  }
+
   for (const p of posts) {
+    const paras = (textToHtml(p.content ?? '').match(/<p>.*?<\/p>/gs)) ?? [];
+    const anchors = byPost.get(p.id) ?? new Map();
     const blocks = [
       `<h2 class="post-title">${esc(p.title ?? '')}</h2>`,
       `<p class="post-date">${p.post_date ? esc(p.post_date.replaceAll('-', '.')) : ''}</p>`,
-      ...textToHtml(p.content ?? '').match(/<p>.*?<\/p>/gs) ?? [],
     ];
-    fillBlocks('', blocks);
+    paras.forEach((para, i) => {
+      blocks.push(para);
+      if (anchors.has(i)) blocks.push(inlinePhotosBlock(anchors.get(i)));
+    });
+    // 文末照片：錨點索引 ≥ 段數（含 Infinity/文末）者集中放在文章結尾
+    const endList = [...anchors.entries()].filter(([idx]) => idx >= paras.length).flatMap(([, v]) => v);
+    if (endList.length) blocks.push(inlinePhotosBlock(endList));
+    fillBlocks('', blocks.filter(Boolean));
   }
 }
 
-// ── 照片頁（拍立得 2×2，每頁 4 張） ──────────────────
+// ── 章節扉頁（大照片＋標題＋留白） ───────────────────
+function renderChapterDivider(imgSrc, title, subtitle) {
+  const safe = newSheet('chapter', false);
+  const sheet = safe.parentElement;
+  sheet.insertAdjacentHTML('beforeend', `
+    <span class="chapter-tape" aria-hidden="true"></span>
+    ${imgSrc ? `<div class="chapter-photo-frame"><img src="${esc(imgSrc)}" alt="${esc(title)}"></div>` : ''}
+    <div class="chapter-text">
+      <h2>${esc(title)}</h2>
+      ${subtitle ? `<p>${esc(subtitle)}</p>` : ''}
+    </div>`);
+}
+
+// 拼貼版位模板（左/上/寬/高 為安全區百分比；rot 度；deco 裝飾類別）
+// 每張照片位置固定於單頁內，確保列印不跨頁裁切；大小交錯、錯落、微傾斜
+// 版位：左/上/寬 為安全區百分比；ar 圖片長寬比（大小交錯）；rot 度；deco 裝飾
+const COLLAGE_TEMPLATES = [
+  [ { l: 3,  t: 3,  w: 50, ar: '4/3', r: -3,  deco: 'tape-tl' },
+    { l: 57, t: 6,  w: 36, ar: '3/4', r: 2.5, deco: 'stamp' },
+    { l: 4,  t: 51, w: 43, ar: '1/1', r: 2,   deco: 'tape-tr tape-accent' },
+    { l: 51, t: 57, w: 42, ar: '4/3', r: -2,  deco: 'tape-tl' } ],
+  [ { l: 5,  t: 2,  w: 56, ar: '4/3', r: 2,   deco: 'tape-tr' },
+    { l: 60, t: 8,  w: 34, ar: '3/4', r: -3,  deco: 'stamp' },
+    { l: 13, t: 53, w: 52, ar: '3/2', r: -1.5,deco: 'tape-tl tape-accent' } ],
+  [ { l: 4,  t: 3,  w: 42, ar: '3/4', r: 2,   deco: 'tape-tr' },
+    { l: 50, t: 5,  w: 44, ar: '4/3', r: -2.5,deco: 'tape-tl tape-accent' },
+    { l: 4,  t: 56, w: 45, ar: '4/3', r: -2,  deco: 'stamp' },
+    { l: 51, t: 51, w: 42, ar: '1/1', r: 3,   deco: 'tape-tr' } ],
+];
+
+function snapHtml(p, slot) {
+  const caption = [p.caption, p.location_name ? `📍 ${p.location_name}` : '']
+    .filter(Boolean).join('　');
+  return `
+    <figure class="snap ${slot.deco}" style="left:${slot.l}%; top:${slot.t}%; width:${slot.w}%; transform: rotate(${slot.r}deg);">
+      <img src="${esc(p.src_url)}" alt="${esc(p.caption ?? '旅行照片')}" style="aspect-ratio:${slot.ar};">
+      ${caption || p.taken_on ? `<figcaption>${esc(caption)}${p.taken_on ? `<span class="loc"> ${esc(p.taken_on.replaceAll('-', '.'))}</span>` : ''}</figcaption>` : ''}
+    </figure>`;
+}
+
+// ── 照片拼貼頁（大小交錯、位置錯落、手帳裝飾；照片維持原樣） ──
 function renderPhotos(photos) {
   if (!photos?.length) return;
-  for (let i = 0; i < photos.length; i += 4) {
-    const chunk = photos.slice(i, i + 4);
+  let ti = 0;
+  let i = 0;
+  while (i < photos.length) {
+    const tpl = COLLAGE_TEMPLATES[ti % COLLAGE_TEMPLATES.length];
+    const chunk = photos.slice(i, i + tpl.length);
     const safe = newSheet();
-    safe.insertAdjacentHTML('beforeend', `
-      ${i === 0 ? '<h2 class="sheet-title">旅途照片</h2>' : ''}
-      <div class="photo-sheet-grid">
-        ${chunk.map(p => `
-          <figure class="print-polaroid">
-            <img src="${esc(p.src_url)}" alt="${esc(p.caption ?? '旅行照片')}">
-            <figcaption>
-              ${esc(p.caption ?? '')}
-              ${p.location_name ? `<div class="loc">📍 ${esc(p.location_name)}</div>` : ''}
-              ${p.taken_on ? `<div class="loc">${esc(p.taken_on.replaceAll('-', '.'))}</div>` : ''}
-            </figcaption>
-          </figure>`).join('')}
-      </div>`);
+    safe.insertAdjacentHTML('beforeend',
+      `<div class="collage">${chunk.map((p, k) => snapHtml(p, tpl[k])).join('')}</div>`);
+    i += tpl.length;
+    ti++;
   }
 }
 
