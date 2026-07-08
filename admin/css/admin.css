@@ -207,6 +207,19 @@ fieldset { border: 1px dashed var(--line); border-radius: 8px; display: grid; ga
 }
 .card.selected { border: 2px solid var(--accent); }
 .card-actions { display: flex; gap: .4rem; flex-shrink: 0; }
+/* 文章卡：內文可展開，長文時按鈕靠上不置中 */
+.post-card { align-items: flex-start; }
+.post-card .card-body { min-width: 0; }
+.post-preview p { margin: .35rem 0 0; font-size: .88rem; line-height: 1.6; overflow-wrap: anywhere; }
+.post-toggle {
+  margin-top: .5rem;
+  padding: .2rem .7rem;
+  font-size: .8rem;
+  background: #fff;
+  color: var(--main);
+  border: 1px solid var(--main);
+  border-radius: 999px;
+}
 .private-field { color: var(--accent); font-size: .85rem; }
 
 .badge {
@@ -229,14 +242,25 @@ fieldset { border: 1px dashed var(--line); border-radius: 8px; display: grid; ga
 }
 .photo-item { margin: 0; background: #fff; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
 .photo-item img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
+/* 直向堆疊：徽章列／說明列／按鈕列各自一行，關聯再多也擠不掉按鈕 */
 .photo-item figcaption {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: .4rem;
+  flex-direction: column;
+  align-items: stretch;
+  gap: .3rem;
   padding: .4rem .6rem;
   font-size: .8rem;
 }
+.photo-tags { display: flex; flex-wrap: wrap; gap: .25rem; min-width: 0; }
+.badge-mini {
+  max-width: 11em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: .72rem;
+  padding: .05rem .45rem;
+}
+.photo-meta { color: #857a68; overflow-wrap: anywhere; }
+.photo-item .photo-actions { justify-content: flex-end; }
 
 /* 天氣卡 */
 .weather-card {
@@ -339,8 +363,6 @@ button, .btn-link, .badge, .chip, .auto-badge, .tab, .weather-retry { white-spac
   .card { flex-direction: column; align-items: stretch; gap: .6rem; }
   .card-actions { flex-shrink: 1; flex-wrap: wrap; }
 
-  /* 照片卡說明：說明在上、按鈕在下 */
-  .photo-item figcaption { flex-direction: column; align-items: flex-start; gap: .3rem; }
 
   /* 天氣卡：輸入框佔整行、按鈕不擠 */
   .weather-card { margin: .8rem 1rem 0; }

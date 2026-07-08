@@ -65,19 +65,41 @@ async function onCitySubmit(e) {
   }
 }
 
+// GPS 座標 → 地名（BigDataCloud 免金鑰 client 端反向地理編碼；失敗不擋天氣顯示）
+async function reverseGeocode(lat, lng) {
+  try {
+    const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=zh-Hant`);
+    if (!res.ok) return null;
+    const d = await res.json();
+    const city = d.city || d.locality || d.principalSubdivision;
+    if (!city) return null;
+    return d.countryName && d.countryName !== city ? `${city}，${d.countryName}` : city;
+  } catch {
+    return null;
+  }
+}
+
 async function fetchWeather(lat, lng, placeName) {
   setStatus('讀取天氣中…');
   try {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto&forecast_days=3`;
-    const res = await fetch(url);
+    // 天氣與地名並行查詢；手動輸入城市已有名稱就不再反查
+    const [res, resolvedName] = await Promise.all([
+      fetch(url),
+      placeName ? Promise.resolve(placeName) : reverseGeocode(lat, lng),
+    ]);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    renderWeather(data, placeName);
+    renderWeather(data, resolvedName ?? `${Number(lat).toFixed(2)}, ${Number(lng).toFixed(2)}`);
     setStatus('');
   } catch (err) {
     setStatus('讀取天氣失敗：' + err.message);
   }
 }
+
+const escText = s => String(s ?? '').replace(/[&<>"']/g, c => ({
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+})[c]);
 
 function renderWeather(data, placeName) {
   const resultEl = document.getElementById('weather-result');
@@ -94,7 +116,7 @@ function renderWeather(data, placeName) {
     <div class="weather-now">
       <span class="weather-now-temp">${Math.round(cur.temperature_2m)}°C</span>
       <span>${describeCode(cur.weather_code)}</span>
-      ${placeName ? `<span class="muted">${placeName}</span>` : ''}
+      ${placeName ? `<span class="muted weather-place">📍 ${escText(placeName)}</span>` : ''}
     </div>
     <div class="weather-days">${days}</div>`;
   resultEl.hidden = false;
