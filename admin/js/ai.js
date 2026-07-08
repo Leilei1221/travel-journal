@@ -1,7 +1,7 @@
 // AI 草稿助手（Phase 3）— 呼叫 gemini-draft Edge Function
 // 金鑰在伺服器端；這裡只送素材、收草稿。產生的內容一律進「草稿」，人工確認才發布。
-import { supabase, SUPABASE_URL, SUPABASE_KEY, toast } from './supabase-client.js?v=10';
-import { setPendingAiDraft } from './posts.js?v=10';
+import { supabase, SUPABASE_URL, SUPABASE_KEY, toast } from './supabase-client.js?v=11';
+import { setPendingAiDraft } from './posts.js?v=11';
 
 const FRONT_BASE = 'https://leilei1221.github.io/travel-journal';
 

@@ -1,7 +1,7 @@
 // 照片上傳與管理 — 前端壓縮（長邊 1600px、目標 ≤ 350KB，PLAN.md §6）後傳 Supabase Storage
 // photos.src_url 存公開網址：日後搬遷 R2 只改網址、不改程式
 // 照片可選擇性關聯到住宿（住宿介紹照片；前臺跟隨該住宿的公開時機）
-import { supabase, esc, toast } from './supabase-client.js?v=10';
+import { supabase, esc, toast } from './supabase-client.js?v=11';
 
 const MAX_EDGE = 1600;
 const TARGET_BYTES = 350 * 1024;
@@ -106,24 +106,32 @@ async function loadList() {
     .order('sort_order');
   if (error) { toast('讀取照片失敗：' + error.message, true); return; }
 
+  // 關聯資訊改精簡小徽章（過長以 … 截斷、完整名稱放 title 提示），
+  // 編輯/刪除鈕獨立一列，不再與徽章同列互擠
+  const miniBadge = (icon, text, label) =>
+    `<span class="badge badge-mini" title="${esc(label)}：${esc(text)}">${icon} ${esc(text)}</span>`;
   listEl.innerHTML = data.length
-    ? data.map(p => `
+    ? data.map(p => {
+      const tags = [
+        p.stays ? miniBadge('🏨', p.stays.name, '住宿') : '',
+        p.posts ? miniBadge('📝', p.posts.title ?? '文章', '文章') : '',
+        p.location_name || p.lat != null ? miniBadge('📍', p.location_name ?? 'GPS', '打卡') : '',
+        p.is_featured ? '<span class="badge badge-public badge-mini">★精選</span>' : '',
+      ].filter(Boolean).join('');
+      const meta = [p.taken_on, p.caption].filter(Boolean).map(esc).join(' ');
+      return `
       <figure class="photo-item" data-id="${p.id}">
         <img src="${esc(p.src_url)}" alt="${esc(p.caption ?? '')}" loading="lazy">
         <figcaption>
-          <span>
-            ${p.stays ? `<span class="badge">🏨 ${esc(p.stays.name)}</span> ` : ''}
-            ${p.posts ? `<span class="badge">📝 ${esc(p.posts.title ?? '文章')}</span> ` : ''}
-            ${p.location_name || p.lat != null ? `<span class="badge">📍 ${esc(p.location_name ?? 'GPS')}</span> ` : ''}
-            ${p.is_featured ? '<span class="badge badge-public">★精選</span> ' : ''}
-            ${esc(p.taken_on ?? '')} ${esc(p.caption ?? '')}
-          </span>
+          ${tags ? `<span class="photo-tags">${tags}</span>` : ''}
+          ${meta ? `<span class="photo-meta">${meta}</span>` : ''}
           <span class="photo-actions">
             <button data-action="edit">編輯</button>
             <button data-action="delete" class="danger">刪除</button>
           </span>
         </figcaption>
-      </figure>`).join('')
+      </figure>`;
+    }).join('')
     : '<p class="muted">尚無照片。</p>';
 
   listEl.querySelectorAll('button').forEach(btn => {

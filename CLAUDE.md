@@ -32,7 +32,7 @@
 
 ## 快取版本控制（重要）
 
-前臺與後臺的 CSS/JS 皆以 `?v=N` 版本參數載入（`front.css`、`admin.css`、所有 JS module import 與入口 script）。**改動 CSS/JS 後務必同步遞增版本號**（目前 v10），否則使用者瀏覽器會在 GitHub Pages 10 分鐘快取內載到舊檔造成「改了沒反應」。
+前臺與後臺的 CSS/JS 皆以 `?v=N` 版本參數載入（`front.css`、`admin.css`、所有 JS module import 與入口 script）。**改動 CSS/JS 後務必同步遞增版本號**（目前 v11），否則使用者瀏覽器會在 GitHub Pages 10 分鐘快取內載到舊檔造成「改了沒反應」。
 
 ## 進度
 

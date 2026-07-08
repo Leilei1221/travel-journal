@@ -1,7 +1,7 @@
 // 行程規劃（每日時間軸）— 依旅程起訖日拆天；航班/住宿即時讀原表落位、不複製；
 // 使用者只加景點，自動歸屬所選那一天；相鄰景點提供大眾運輸路線連結
-import { supabase, esc, toast, isoToLocal } from './supabase-client.js?v=10';
-import { buildDailyTimeline, dayLabel, routeUrl, itemMapsUrl } from '../../assets/js/day-timeline.js?v=10';
+import { supabase, esc, toast, isoToLocal } from './supabase-client.js?v=11';
+import { buildDailyTimeline, dayLabel, routeUrl, itemMapsUrl } from '../../assets/js/day-timeline.js?v=11';
 
 let trip = null;
 let editingId = null;

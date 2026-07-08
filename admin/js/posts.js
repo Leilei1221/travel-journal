@@ -1,6 +1,6 @@
 // 文章管理 — 前臺「旅程故事」（行前情報＋每日遊記）與「旅行筆記」（旅程總結）的內容來源
 // 僅「已發布」文章對外可見；AI 草稿生成為 Phase 3（ai_draft 欄位已預留）
-import { supabase, esc, toast } from './supabase-client.js?v=10';
+import { supabase, esc, toast } from './supabase-client.js?v=11';
 
 const TYPE_LABEL = { pretrip: '行前情報', daily: '每日遊記', summary: '旅程總結' };
 const TYPE_HINT = { pretrip: '→ 前臺「旅程故事」', daily: '→ 前臺「旅程故事」', summary: '→ 前臺「旅行筆記」' };
@@ -31,29 +31,49 @@ export async function loadPosts(trip) {
     .order('created_at');
   if (error) { toast('讀取文章失敗：' + error.message, true); return; }
 
+  // 內文預設只顯示前幾段，其餘收進「閱讀全文」
+  const PREVIEW_PARAS = 2;
+  const paraHtml = list => list.map(s => `<p>${esc(s).replace(/\n/g, '<br>')}</p>`).join('');
   listEl.innerHTML = data.length
-    ? data.map(p => `
-      <div class="card" data-id="${p.id}">
+    ? data.map(p => {
+      const paras = String(p.content ?? '').split(/\n{2,}/).map(s => s.trim()).filter(Boolean);
+      const rest = paras.slice(PREVIEW_PARAS);
+      return `
+      <div class="card post-card" data-id="${p.id}">
         <div class="card-body">
           <span class="badge">${TYPE_LABEL[p.post_type] ?? esc(p.post_type)}</span>
           ${p.status === 'published'
             ? '<span class="badge badge-public">已發布</span>'
             : '<span class="badge">草稿</span>'}
           <strong>${esc(p.title ?? '（未命名）')}</strong>
-          <div class="muted">${esc(p.post_date ?? '未填日期')}｜${esc((p.content ?? '').slice(0, 50))}${(p.content ?? '').length > 50 ? '…' : ''}</div>
+          <div class="muted">${esc(p.post_date ?? '未填日期')}</div>
+          <div class="post-preview">${paraHtml(paras.slice(0, PREVIEW_PARAS))}</div>
+          ${rest.length ? `
+            <div class="post-preview post-rest" hidden>${paraHtml(rest)}</div>
+            <button type="button" data-action="toggle" class="post-toggle"
+              data-more="閱讀全文（還有 ${rest.length} 段）">閱讀全文（還有 ${rest.length} 段）</button>` : ''}
         </div>
         <div class="card-actions">
           <button data-action="edit">編輯</button>
           <button data-action="delete" class="danger">刪除</button>
         </div>
-      </div>`).join('')
+      </div>`;
+    }).join('')
     : '<p class="muted">尚無文章。寫一篇行前情報試試？</p>';
 
   listEl.querySelectorAll('button').forEach(btn => {
     btn.addEventListener('click', () => {
-      const p = data.find(x => x.id === btn.closest('.card').dataset.id);
+      const card = btn.closest('.card');
+      if (btn.dataset.action === 'toggle') {
+        const rest = card.querySelector('.post-rest');
+        const show = rest.hidden;
+        rest.hidden = !show;
+        btn.textContent = show ? '收合' : btn.dataset.more;
+        return;
+      }
+      const p = data.find(x => x.id === card.dataset.id);
       if (btn.dataset.action === 'edit') fillForm(p);
-      else deletePost(p);
+      else if (btn.dataset.action === 'delete') deletePost(p);
     });
   });
 }

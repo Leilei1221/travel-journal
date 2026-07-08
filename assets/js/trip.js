@@ -1,7 +1,7 @@
 // 旅程內頁：per-trip 主題色＋四頁籤（故事/行程/照片/筆記）
 // 只查公開表；私人表（*_private、expenses）永不撈取
-import { supabase, esc, textToHtml, dateRange, mapsUrl } from './front-client.js?v=10';
-import { buildDailyTimeline, dayLabel, routeUrl, itemMapsUrl, localDateStr } from './day-timeline.js?v=10';
+import { supabase, esc, textToHtml, dateRange, mapsUrl } from './front-client.js?v=11';
+import { buildDailyTimeline, dayLabel, routeUrl, itemMapsUrl, localDateStr } from './day-timeline.js?v=11';
 
 const POST_TYPE_LABEL = { pretrip: '行前情報', daily: '每日遊記', summary: '旅程總結' };
 
@@ -128,6 +128,8 @@ function postPhotosHtml(list) {
     </figure>`).join('')}</div>`;
 }
 
+const PREVIEW_PARAS = 3; // 長文預設顯示段數，其餘收在「閱讀全文」
+
 async function renderPosts(el, posts, emptyText) {
   if (!posts?.length) { el.innerHTML = `<p class="empty-note">${emptyText}</p>`; return; }
   const photoMap = await postPhotoMap(posts.map(p => p.id));
@@ -135,17 +137,34 @@ async function renderPosts(el, posts, emptyText) {
     const paras = (textToHtml(p.content ?? '').match(/<p>.*?<\/p>/gs)) ?? [];
     const anchors = photoMap[p.id] ?? new Map();
     // 圖文穿插：段落後插入該錨點照片
-    const body = paras.map((para, i) => para + (anchors.has(i) ? postPhotosHtml(anchors.get(i)) : '')).join('');
+    const segs = paras.map((para, i) => para + (anchors.has(i) ? postPhotosHtml(anchors.get(i)) : ''));
     // 文末照片：錨點索引 ≥ 段數（含 null/文末）
     const endList = [...anchors.entries()].filter(([idx]) => idx >= paras.length).flatMap(([, v]) => v);
+    // 長文：預設只放前幾段，其餘（含文末照片）收進「閱讀全文」
+    const clamp = paras.length > PREVIEW_PARAS + 1;
+    const bodyHtml = clamp
+      ? `<div class="post-body">${segs.slice(0, PREVIEW_PARAS).join('')}</div>
+         <div class="post-body post-rest" hidden>${segs.slice(PREVIEW_PARAS).join('')}${postPhotosHtml(endList)}</div>
+         <button type="button" class="btn-more post-toggle" aria-expanded="false"
+           data-more="閱讀全文（還有 ${paras.length - PREVIEW_PARAS} 段）">閱讀全文（還有 ${paras.length - PREVIEW_PARAS} 段）</button>`
+      : `<div class="post-body">${segs.join('')}</div>${postPhotosHtml(endList)}`;
     return `
       <article class="post">
         <h3>${esc(p.title ?? POST_TYPE_LABEL[p.post_type])}</h3>
         <div class="post-date">${esc(POST_TYPE_LABEL[p.post_type])}${p.post_date ? `・${esc(p.post_date.replaceAll('-', '.'))}` : ''}</div>
-        <div class="post-body">${body}</div>
-        ${postPhotosHtml(endList)}
+        ${bodyHtml}
       </article>`;
   }).join('');
+
+  el.querySelectorAll('.post-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const rest = btn.closest('.post').querySelector('.post-rest');
+      const show = rest.hidden;
+      rest.hidden = !show;
+      btn.setAttribute('aria-expanded', String(show));
+      btn.textContent = show ? '收合' : btn.dataset.more;
+    });
+  });
 }
 
 async function loadPlan() {
@@ -302,16 +321,19 @@ async function loadPhotos() {
         <div class="polaroid-grid">${shown.map(polaroidHtml).join('')}</div>
         ${hidden.length ? `
           <div class="polaroid-grid photo-more" id="${gid}" hidden>${hidden.map(polaroidHtml).join('')}</div>
-          <button type="button" class="btn-more" data-target="${gid}">＋ 展開其餘 ${hidden.length} 張</button>
+          <button type="button" class="btn-more" data-target="${gid}" data-total="${list.length}" aria-expanded="false">看全部 ${list.length} 張</button>
         ` : ''}
       </section>`;
   }).join('');
 
+  // 展開/收合切換（按鈕保留，可再收回）
   el.querySelectorAll('.btn-more').forEach(btn => {
     btn.addEventListener('click', () => {
       const more = document.getElementById(btn.dataset.target);
-      more.hidden = false;
-      btn.remove();
+      const show = more.hidden;
+      more.hidden = !show;
+      btn.setAttribute('aria-expanded', String(show));
+      btn.textContent = show ? '收合' : `看全部 ${btn.dataset.total} 張`;
     });
   });
 }
