@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex">
   <title>旅遊手帳｜後臺</title>
-  <link rel="stylesheet" href="css/admin.css?v=12">
+  <link rel="stylesheet" href="css/admin.css?v=13">
 </head>
 <body>
 
@@ -468,22 +468,27 @@
 
       <h2>查詢結果</h2>
       <div id="ins-results" class="list"><p class="muted">尚未查詢。</p></div>
+
+      <h2>保障比較</h2>
+      <div class="ins-notice">⚠️ 2026/4 起，一人最多投保 2 張旅遊不便險，同一家限一張；班機延誤單張最高賠 1.2 萬，兩張合計上限 2.4 萬。</div>
+      <p class="muted">保障內容僅供決策參考，實際條款與額度以各公司官網為準。</p>
+      <div id="ins-compare" class="ins-compare"></div>
     </main>
   </section>
 
   <script type="module">
-    import { initAuth } from './js/auth.js?v=12';
-    import { initTrips, loadTrips } from './js/trips.js?v=12';
-    import { initFlights, loadFlights } from './js/flights.js?v=12';
-    import { initStays, loadStays } from './js/stays.js?v=12';
-    import { initTransport, loadTransport } from './js/transport.js?v=12';
-    import { initItinerary, loadItinerary } from './js/itinerary.js?v=12';
-    import { initExpenses, loadExpenses } from './js/expenses.js?v=12';
-    import { initPhotos, loadPhotos } from './js/photos.js?v=12';
-    import { initPosts, loadPosts } from './js/posts.js?v=12';
-    import { initAi, loadAi } from './js/ai.js?v=12';
-    import { initWeather } from './js/weather.js?v=12';
-    import { initInsurance, loadInsurance } from './js/insurance.js?v=12';
+    import { initAuth } from './js/auth.js?v=13';
+    import { initTrips, loadTrips } from './js/trips.js?v=13';
+    import { initFlights, loadFlights } from './js/flights.js?v=13';
+    import { initStays, loadStays } from './js/stays.js?v=13';
+    import { initTransport, loadTransport } from './js/transport.js?v=13';
+    import { initItinerary, loadItinerary } from './js/itinerary.js?v=13';
+    import { initExpenses, loadExpenses } from './js/expenses.js?v=13';
+    import { initPhotos, loadPhotos } from './js/photos.js?v=13';
+    import { initPosts, loadPosts } from './js/posts.js?v=13';
+    import { initAi, loadAi } from './js/ai.js?v=13';
+    import { initWeather } from './js/weather.js?v=13';
+    import { initInsurance, loadInsurance } from './js/insurance.js?v=13';
 
     const loginView = document.getElementById('login-view');
     const appView = document.getElementById('app-view');

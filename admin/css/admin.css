@@ -396,6 +396,44 @@ fieldset { border: 1px dashed var(--line); border-radius: 8px; display: grid; ga
 }
 .ins-divider { border: none; border-top: 1px dashed var(--line); margin: .8rem 0; }
 
+/* 保障比較表 */
+.ins-notice {
+  background: #fdf3e3;
+  border: 1px solid #e8c98a;
+  border-radius: 8px;
+  padding: .55rem .8rem;
+  font-size: .9rem;
+  margin: .6rem 0 .4rem;
+}
+.ins-compare {
+  overflow-x: auto;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.ins-compare > .muted { padding: .8rem 1rem; display: block; }
+.ins-table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: .9rem; }
+.ins-table th, .ins-table td {
+  padding: .5rem .75rem;
+  text-align: left;
+  border-bottom: 1px dashed var(--line);
+  white-space: nowrap;
+}
+.ins-table thead th { border-bottom: 1px solid var(--line); vertical-align: top; }
+.ins-table thead th .muted { font-weight: 400; }
+.ins-table tbody th, .ins-table thead th:first-child {
+  position: sticky;
+  left: 0;
+  background: #fff;
+  color: #6b6455;
+  font-weight: 400;
+}
+.ins-table tr:last-child th, .ins-table tr:last-child td { border-bottom: none; }
+.ins-row-key th, .ins-row-key td { background: #fdf3e3 !important; font-weight: 700; }
+.ins-row-key th { color: #8a5a1a; }
+.ins-ok { color: #2e7d5b; font-weight: 700; }
+.ins-no { color: #b7b0a2; }
+
 /* ── 全域防呆：按鈕/連結/徽章/頁籤文字一律水平，不逐字直排 ── */
 button, .btn-link, .badge, .chip, .auto-badge, .tab, .weather-retry { white-space: nowrap; }
 

@@ -1,7 +1,7 @@
 // 旅程內頁：per-trip 主題色＋四頁籤（故事/行程/照片/筆記）
 // 只查公開表；私人表（*_private、expenses）永不撈取
-import { supabase, esc, textToHtml, dateRange, mapsUrl } from './front-client.js?v=12';
-import { buildDailyTimeline, dayLabel, routeUrl, itemMapsUrl, localDateStr } from './day-timeline.js?v=12';
+import { supabase, esc, textToHtml, dateRange, mapsUrl } from './front-client.js?v=13';
+import { buildDailyTimeline, dayLabel, routeUrl, itemMapsUrl, localDateStr } from './day-timeline.js?v=13';
 
 const POST_TYPE_LABEL = { pretrip: '行前情報', daily: '每日遊記', summary: '旅程總結' };
 

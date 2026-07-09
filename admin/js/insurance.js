@@ -1,8 +1,10 @@
 // 旅平險投保決策儀表板 — ti_ 表 RLS 僅本人，前臺永不撈取
-// 本批：查詢表單＋簽證區塊＋簽證分類總覽；保費試算/風險/健康/文化留待後續批次
-// 鐵則：簽證資料缺什麼就不顯示什麼，程式端絕不臆測或補預設值；
-//       已建檔卡片只放 apply_url 這一個申請連結，未建檔一律導向外交部領事事務局
-import { supabase, esc, toast } from './supabase-client.js?v=12';
+// 第 2 批：查詢表單＋簽證區塊＋簽證分類總覽
+// 第 3 批：保障比較表（比保障不比保費，意外險費率為政府統一標準；ti_rate_bands 暫不使用）
+// 風險/健康/文化留待後續批次
+// 鐵則：資料缺什麼就不顯示什麼，程式端絕不臆測或補預設值；
+//       簽證卡只放 apply_url、比較表只放 enroll_url 這一個官方連結
+import { supabase, esc, toast } from './supabase-client.js?v=13';
 
 const VERIFIED = new Set(['已建檔', 'verified']);
 const CATEGORY_ORDER = ['免簽', '電子簽', '落地簽', '須事先辦簽'];
@@ -10,22 +12,28 @@ const HOUR_MS = 3600 * 1000;
 
 let countries = [];
 let visaRows = [];
+let plans = [];
 
 export function initInsurance() {
   document.getElementById('insurance-form').addEventListener('submit', runQuery);
 }
 
 export async function loadInsurance() {
-  const [cRes, vRes] = await Promise.all([
+  const [cRes, vRes, pRes] = await Promise.all([
     supabase.from('ti_countries').select('id, name_zh, region').order('region').order('name_zh'),
     supabase.from('ti_country_visa').select('*'),
+    supabase.from('ti_plans').select('*, ti_insurers(name)'),
   ]);
-  const error = cRes.error ?? vRes.error;
+  const error = cRes.error ?? vRes.error ?? pRes.error;
   if (error) { toast('讀取旅平險資料失敗：' + error.message, true); return; }
   countries = cRes.data;
   visaRows = vRes.data;
+  plans = pRes.data.sort((a, b) =>
+    (a.ti_insurers?.name ?? '').localeCompare(b.ti_insurers?.name ?? '', 'zh-Hant')
+    || (a.plan_name ?? '').localeCompare(b.plan_name ?? '', 'zh-Hant'));
   renderChips();
   renderOverview(selectedIds());
+  renderCompare();
 }
 
 function selectedIds() {
@@ -57,7 +65,7 @@ function runQuery(e) {
   const birthYear = f.elements.birth_year.value;
   const age = birthYear ? Number(depart.slice(0, 4)) - Number(birthYear) : null;
   document.getElementById('ins-trip-summary').textContent =
-    `旅程 ${days} 天` + (age != null ? `・出發時約 ${age} 歲（保費試算於後續批次使用）` : '');
+    `旅程 ${days} 天` + (age != null ? `・出發時約 ${age} 歲` : '');
 
   renderCards(ids, depart, days);
   renderOverview(new Set(ids));
@@ -157,4 +165,52 @@ function renderOverview(selected) {
             selected.has(id) ? `<strong>${esc(name)}</strong>` : esc(name)).join('、')}</span>
         </div>`).join('')
     : '<p class="muted">尚無已建檔的簽證資料。</p>';
+}
+
+// ── 保障比較表：各家一欄，布林 ✓/✗，法定傳染病列醒目標示 ──
+function renderCompare() {
+  const box = document.getElementById('ins-compare');
+  if (!plans.length) {
+    box.innerHTML = '<p class="muted">尚無保險方案資料，請先建檔。</p>';
+    return;
+  }
+  const money = v => v != null ? `${Number(v).toLocaleString()} 萬` : '—';
+  const bool = v => v ? '<span class="ins-ok">✓</span>' : '<span class="ins-no">✗</span>';
+  const day = v => {
+    if (!v) return '—';
+    const d = new Date(v);
+    return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
+  };
+  const enroll = v => v
+    ? `<a href="${esc(v)}" target="_blank" rel="noopener">官網投保</a>` : '—';
+
+  const rows = [
+    ['意外身故/失能', p => money(p.accident_coverage)],
+    ['海外突發疾病醫療', p => money(p.medical_coverage)],
+    ['海外突發疾病', p => bool(p.overseas_illness)],
+    ['法定傳染病 ★', p => bool(p.legal_infectious), 'ins-row-key'],
+    ['班機延誤', p => bool(p.flight_delay)],
+    ['行李損失', p => bool(p.baggage)],
+    ['旅程取消', p => bool(p.trip_cancel)],
+    ['緊急救援額度', p => money(p.emergency_rescue_amount)],
+    ['線上投保', p => enroll(p.enroll_url)],
+    ['資料整理日', p => `<span class="muted">${day(p.data_updated_at)}</span>`],
+  ];
+
+  box.innerHTML = `
+    <table class="ins-table">
+      <thead>
+        <tr>
+          <th></th>
+          ${plans.map(p => `<th>${esc(p.ti_insurers?.name ?? '（未知公司）')}<br><span class="muted">${esc(p.plan_name ?? '')}</span></th>`).join('')}
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map(([label, cell, cls]) => `
+          <tr${cls ? ` class="${cls}"` : ''}>
+            <th scope="row">${label}</th>
+            ${plans.map(p => `<td>${cell(p)}</td>`).join('')}
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
 }

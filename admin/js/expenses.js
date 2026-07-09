@@ -1,7 +1,7 @@
 // 記帳 CRUD — expenses 表 RLS 僅本人可讀寫，前臺永不撈取
 // 可選擇性關聯到目前旅程的某筆住宿/航班/交通卡片（擇一）
-import { supabase, SUPABASE_URL, SUPABASE_KEY, esc, toast } from './supabase-client.js?v=12';
-import { setAiStatus } from './ai.js?v=12';
+import { supabase, SUPABASE_URL, SUPABASE_KEY, esc, toast } from './supabase-client.js?v=13';
+import { setAiStatus } from './ai.js?v=13';
 
 const RECEIPT_MAX_EDGE = 1200;
 
