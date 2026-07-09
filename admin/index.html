@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex">
   <title>旅遊手帳｜後臺</title>
-  <link rel="stylesheet" href="css/admin.css?v=11">
+  <link rel="stylesheet" href="css/admin.css?v=12">
 </head>
 <body>
 
@@ -55,6 +55,7 @@
       <button class="tab" data-tab="expenses" disabled>記帳</button>
       <button class="tab" data-tab="photos" disabled>照片</button>
       <button class="tab" data-tab="posts" disabled>文章</button>
+      <button class="tab" data-tab="insurance">旅平險</button>
     </nav>
 
     <!-- 旅程 -->
@@ -443,20 +444,46 @@
         </label>
       </div>
     </main>
+
+    <!-- 旅平險投保決策（不需選旅程） -->
+    <main id="tab-insurance" class="tab-panel" hidden>
+      <h2>🛡️ 旅平險投保決策</h2>
+      <p class="muted">選目的地與日期後查詢。本批先提供<b>簽證資訊</b>，保費試算/風險/健康/文化區塊後續批次加入。簽證資料僅供決策參考，申請前請以官方網站為準。</p>
+      <form id="insurance-form" class="form-grid">
+        <fieldset class="full ins-countries-box">
+          <legend>目的地國家（可多選）</legend>
+          <div id="ins-countries" class="ins-chips"><span class="muted">載入中…</span></div>
+        </fieldset>
+        <label>出發日期<input type="date" name="depart_date" required></label>
+        <label>回程日期<input type="date" name="return_date" required></label>
+        <label>出生年（算年齡，供保費試算）<input type="number" name="birth_year" min="1900" max="2100" placeholder="例：1988"></label>
+        <div class="full form-actions">
+          <button type="submit">查詢</button>
+          <span id="ins-trip-summary" class="muted"></span>
+        </div>
+      </form>
+
+      <h2>簽證分類總覽（已建檔國家）</h2>
+      <div id="ins-overview" class="ins-overview"></div>
+
+      <h2>查詢結果</h2>
+      <div id="ins-results" class="list"><p class="muted">尚未查詢。</p></div>
+    </main>
   </section>
 
   <script type="module">
-    import { initAuth } from './js/auth.js?v=11';
-    import { initTrips, loadTrips } from './js/trips.js?v=11';
-    import { initFlights, loadFlights } from './js/flights.js?v=11';
-    import { initStays, loadStays } from './js/stays.js?v=11';
-    import { initTransport, loadTransport } from './js/transport.js?v=11';
-    import { initItinerary, loadItinerary } from './js/itinerary.js?v=11';
-    import { initExpenses, loadExpenses } from './js/expenses.js?v=11';
-    import { initPhotos, loadPhotos } from './js/photos.js?v=11';
-    import { initPosts, loadPosts } from './js/posts.js?v=11';
-    import { initAi, loadAi } from './js/ai.js?v=11';
-    import { initWeather } from './js/weather.js?v=11';
+    import { initAuth } from './js/auth.js?v=12';
+    import { initTrips, loadTrips } from './js/trips.js?v=12';
+    import { initFlights, loadFlights } from './js/flights.js?v=12';
+    import { initStays, loadStays } from './js/stays.js?v=12';
+    import { initTransport, loadTransport } from './js/transport.js?v=12';
+    import { initItinerary, loadItinerary } from './js/itinerary.js?v=12';
+    import { initExpenses, loadExpenses } from './js/expenses.js?v=12';
+    import { initPhotos, loadPhotos } from './js/photos.js?v=12';
+    import { initPosts, loadPosts } from './js/posts.js?v=12';
+    import { initAi, loadAi } from './js/ai.js?v=12';
+    import { initWeather } from './js/weather.js?v=12';
+    import { initInsurance, loadInsurance } from './js/insurance.js?v=12';
 
     const loginView = document.getElementById('login-view');
     const appView = document.getElementById('app-view');
@@ -471,6 +498,7 @@
       expenses: () => loadExpenses(currentTrip),
       photos: () => loadPhotos(currentTrip),
       posts: () => { loadPosts(currentTrip); loadAi(currentTrip); },
+      insurance: () => loadInsurance(),
     };
 
     // 頁籤切換
@@ -500,6 +528,7 @@
     initPosts();
     initAi();
     initWeather();
+    initInsurance();
 
     initAuth({
       onLogin() {

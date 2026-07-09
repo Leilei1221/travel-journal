@@ -332,6 +332,70 @@ fieldset { border: 1px dashed var(--line); border-radius: 8px; display: grid; ga
 }
 .toast-error { background: var(--danger); }
 
+/* ── 旅平險投保決策 ── */
+.ins-countries-box { border: 1px dashed var(--line); border-radius: 8px; }
+.ins-chips { display: flex; flex-wrap: wrap; gap: .45rem; }
+.form-grid label.ins-chip {
+  flex-direction: row;
+  align-items: center;
+  gap: .35rem;
+  padding: .25rem .75rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  cursor: pointer;
+  font-size: .9rem;
+  white-space: nowrap;
+}
+.ins-chip input { accent-color: var(--main); margin: 0; }
+.ins-chip:has(input:checked) { border-color: var(--main); background: #e9f1f1; font-weight: 700; }
+
+.ins-overview {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: .5rem 1rem;
+}
+.ins-cat { display: flex; gap: .7rem; align-items: baseline; padding: .4rem 0; border-bottom: 1px dashed var(--line); font-size: .9rem; }
+.ins-cat:last-child { border-bottom: none; }
+.ins-cat-name {
+  flex-shrink: 0;
+  background: var(--main);
+  color: #fff;
+  border-radius: 999px;
+  padding: .1rem .6rem;
+  font-size: .8rem;
+  white-space: nowrap;
+}
+
+.ins-card { align-items: flex-start; }
+.ins-card .card-body { min-width: 0; }
+.ins-country { margin: 0 0 .4rem; font-size: 1.05rem; color: var(--main); }
+.ins-unfiled { border: 1.5px dashed var(--line); }
+.ins-visa-head { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin-bottom: .35rem; }
+.ins-fee-row { display: flex; align-items: baseline; gap: .5rem; margin: .25rem 0; }
+.ins-fee { font-size: 1.5rem; font-weight: 700; }
+.ins-fee-warning {
+  background: #fdecea;
+  color: var(--danger);
+  border-radius: 8px;
+  padding: .45rem .7rem;
+  font-size: .85rem;
+  margin: .3rem 0 .5rem;
+}
+.ins-overstay { color: var(--danger); font-weight: 700; font-size: .85rem; }
+.ins-line { margin-top: .45rem; }
+.ins-visa .btn-link { margin-top: .2rem; }
+.ins-timing {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: .45rem .7rem;
+  font-size: .9rem;
+  margin-top: .5rem;
+}
+.ins-divider { border: none; border-top: 1px dashed var(--line); margin: .8rem 0; }
+
 /* ── 全域防呆：按鈕/連結/徽章/頁籤文字一律水平，不逐字直排 ── */
 button, .btn-link, .badge, .chip, .auto-badge, .tab, .weather-retry { white-space: nowrap; }
 

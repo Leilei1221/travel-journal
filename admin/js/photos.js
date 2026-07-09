@@ -1,7 +1,7 @@
 // 照片上傳與管理 — 前端壓縮（長邊 1600px、目標 ≤ 350KB，PLAN.md §6）後傳 Supabase Storage
 // photos.src_url 存公開網址：日後搬遷 R2 只改網址、不改程式
 // 照片可選擇性關聯到住宿（住宿介紹照片；前臺跟隨該住宿的公開時機）
-import { supabase, esc, toast } from './supabase-client.js?v=11';
+import { supabase, esc, toast } from './supabase-client.js?v=12';
 
 const MAX_EDGE = 1600;
 const TARGET_BYTES = 350 * 1024;

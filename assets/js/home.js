@@ -1,5 +1,5 @@
 // 首頁：公開旅程 → Hero 大圖＋拍立得卡片
-import { supabase, esc, ym, tripImage } from './front-client.js?v=11';
+import { supabase, esc, ym, tripImage } from './front-client.js?v=12';
 
 const STATUS_LABEL = { planning: '規劃中', traveling: '旅途中' };
 

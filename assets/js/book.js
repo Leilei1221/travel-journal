@@ -1,6 +1,6 @@
 // A5 旅遊小書（PLAN.md §8）— 封面/行程/遊記/照片牆/封底，自動分頁
 // 資料權限：匿名只能匯出公開旅程；本人於同瀏覽器登入後臺後，可匯出未公開旅程
-import { supabase, esc, textToHtml, dateRange } from './front-client.js?v=11';
+import { supabase, esc, textToHtml, dateRange } from './front-client.js?v=12';
 
 const tripId = new URLSearchParams(location.search).get('id');
 const bookEl = document.getElementById('book');

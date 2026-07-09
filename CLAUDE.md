@@ -32,7 +32,7 @@
 
 ## 快取版本控制（重要）
 
-前臺與後臺的 CSS/JS 皆以 `?v=N` 版本參數載入（`front.css`、`admin.css`、所有 JS module import 與入口 script）。**改動 CSS/JS 後務必同步遞增版本號**（目前 v11），否則使用者瀏覽器會在 GitHub Pages 10 分鐘快取內載到舊檔造成「改了沒反應」。
+前臺與後臺的 CSS/JS 皆以 `?v=N` 版本參數載入（`front.css`、`admin.css`、所有 JS module import 與入口 script）。**改動 CSS/JS 後務必同步遞增版本號**（目前 v12），否則使用者瀏覽器會在 GitHub Pages 10 分鐘快取內載到舊檔造成「改了沒反應」。
 
 ## 進度
 
@@ -50,7 +50,8 @@
   - ✅ 記帳拍收據辨識（`gemini-draft` Edge Function `receipt` mode，Gemini Vision 解析收據圖片回傳 JSON；前端壓縮至 1200px→base64→呼叫→預填記帳表單，仍需人工確認才儲存；**已部署 version 3**）
   - ✅ 行程規劃 → **每日時間軸改版**（`assets/js/day-timeline.js` 後臺前臺共用）：依旅程起訖日拆第 1 天…第 N 天，後臺加景點用「第 N 天」下拉自動帶入 `item_date`；每天航班（依 depart_time 本地日期）＋住宿（依 check_in）**即時讀原表落位、不複製**，改原表自動同步；相鄰景點「🚇 前往下一站」大眾運輸連結；前臺空白日隱藏。表 `itinerary_items`（migration 0010 已套用）
   - ✅ 小書圖文穿插（方案 A 段落錨點 `photos.post_paragraph`，migration 0011 已套用）＋手帳拼貼版式（見 PLAN §8）
-  - ✅ 旅平險投保決策儀表板資料表（`ti_` 前綴 8 張，migration 0012 已套用）：保險 `ti_insurers`/`ti_plans`/`ti_rate_bands`＋國家 `ti_countries`＋簽證 `ti_country_visa`＋風險/健康/文化 `ti_country_risk`/`ti_country_health`/`ti_country_culture`；RLS 一律僅本人（同 expenses 模式，無 trip_id 不掛公開旅程）；`ti_rate_bands`/`ti_country_visa`/`ti_country_risk` 掛 `touch_updated_at`；儀表板前端尚未做
+  - ✅ 旅平險投保決策儀表板資料表（`ti_` 前綴 8 張，migration 0012 已套用）：保險 `ti_insurers`/`ti_plans`/`ti_rate_bands`＋國家 `ti_countries`＋簽證 `ti_country_visa`＋風險/健康/文化 `ti_country_risk`/`ti_country_health`/`ti_country_culture`；RLS 一律僅本人（同 expenses 模式，無 trip_id 不掛公開旅程）；`ti_rate_bands`/`ti_country_visa`/`ti_country_risk` 掛 `touch_updated_at`
+    - 第 2 批：✅ 後臺「旅平險」頁籤（`admin/js/insurance.js`，不需選旅程）：查詢表單（國家多選 chip＋出發/回程日＋出生年→旅程天數/年齡）＋每國簽證卡片（`data_status` 已建檔/verified 才顯示完整資訊：official_fee 大字＋fee_warning、唯一官方 apply_url、必備文件/特別提醒、申請時機——apply_window_hours 有值依出發日回推「最早 M/D 可申請」，無值直接顯示 warning_note 建議；旅程天數超過 visa_free_days 顯紅字警告）；未建檔/查無一律「尚未建檔請查外交部」＋mofa_query_url，絕不臆測＋簽證分類總覽（visa_category 分組，選到的加粗）。保費/風險/健康/文化區塊待後續批次
 
 ## Gmail 航班異動信解析（Phase 4 操作程序，非程式碼）
 
