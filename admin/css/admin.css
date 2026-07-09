@@ -434,6 +434,20 @@ fieldset { border: 1px dashed var(--line); border-radius: 8px; display: grid; ga
 .ins-ok { color: #2e7d5b; font-weight: 700; }
 .ins-no { color: #b7b0a2; }
 
+/* 風險建議卡（語氣中性「建議留意」；無對應規則整區隱藏） */
+.ins-risk-card {
+  background: #fdf8ec;
+  border: 1px solid #e8c98a;
+  border-left: 4px solid #d9a441;
+  border-radius: 10px;
+  padding: .8rem 1rem;
+}
+.ins-risk-head { display: flex; flex-wrap: wrap; gap: .2rem .6rem; align-items: baseline; }
+.ins-risk-title { font-weight: 700; color: #8a5a1a; }
+.ins-risk-src { font-size: .8rem; color: #857a68; }
+.ins-risk-plain { margin: .35rem 0 0; font-size: .9rem; line-height: 1.65; }
+.ins-risk-link { margin-top: .45rem; font-size: .85rem; color: #2e7d5b; }
+
 /* ── 全域防呆：按鈕/連結/徽章/頁籤文字一律水平，不逐字直排 ── */
 button, .btn-link, .badge, .chip, .auto-badge, .tab, .weather-retry { white-space: nowrap; }
 

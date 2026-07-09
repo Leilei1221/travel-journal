@@ -1,6 +1,6 @@
 // 住宿 CRUD — 公開欄位存 stays，訂單編號等私人欄位存 stay_private（RLS 僅本人）
 // google_place_id / lat / lng 供 Phase 2 Google Places 整合使用，可留白
-import { supabase, esc, toast } from './supabase-client.js?v=13';
+import { supabase, esc, toast } from './supabase-client.js?v=14';
 
 let tripId = null;
 let editingId = null;

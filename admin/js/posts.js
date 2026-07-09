@@ -1,6 +1,6 @@
 // 文章管理 — 前臺「旅程故事」（行前情報＋每日遊記）與「旅行筆記」（旅程總結）的內容來源
 // 僅「已發布」文章對外可見；AI 草稿生成為 Phase 3（ai_draft 欄位已預留）
-import { supabase, esc, toast } from './supabase-client.js?v=13';
+import { supabase, esc, toast } from './supabase-client.js?v=14';
 
 const TYPE_LABEL = { pretrip: '行前情報', daily: '每日遊記', summary: '旅程總結' };
 const TYPE_HINT = { pretrip: '→ 前臺「旅程故事」', daily: '→ 前臺「旅程故事」', summary: '→ 前臺「旅行筆記」' };
