@@ -50,6 +50,7 @@
   - ✅ 記帳拍收據辨識（`gemini-draft` Edge Function `receipt` mode，Gemini Vision 解析收據圖片回傳 JSON；前端壓縮至 1200px→base64→呼叫→預填記帳表單，仍需人工確認才儲存；**已部署 version 3**）
   - ✅ 行程規劃 → **每日時間軸改版**（`assets/js/day-timeline.js` 後臺前臺共用）：依旅程起訖日拆第 1 天…第 N 天，後臺加景點用「第 N 天」下拉自動帶入 `item_date`；每天航班（依 depart_time 本地日期）＋住宿（依 check_in）**即時讀原表落位、不複製**，改原表自動同步；相鄰景點「🚇 前往下一站」大眾運輸連結；前臺空白日隱藏。表 `itinerary_items`（migration 0010 已套用）
   - ✅ 小書圖文穿插（方案 A 段落錨點 `photos.post_paragraph`，migration 0011 已套用）＋手帳拼貼版式（見 PLAN §8）
+  - ✅ 旅平險投保決策儀表板資料表（`ti_` 前綴 8 張，migration 0012 已套用）：保險 `ti_insurers`/`ti_plans`/`ti_rate_bands`＋國家 `ti_countries`＋簽證 `ti_country_visa`＋風險/健康/文化 `ti_country_risk`/`ti_country_health`/`ti_country_culture`；RLS 一律僅本人（同 expenses 模式，無 trip_id 不掛公開旅程）；`ti_rate_bands`/`ti_country_visa`/`ti_country_risk` 掛 `touch_updated_at`；儀表板前端尚未做
 
 ## Gmail 航班異動信解析（Phase 4 操作程序，非程式碼）
 
