@@ -434,6 +434,27 @@ fieldset { border: 1px dashed var(--line); border-radius: 8px; display: grid; ga
 .ins-ok { color: #2e7d5b; font-weight: 700; }
 .ins-no { color: #b7b0a2; }
 
+/* 記帳：類別折疊清單 */
+details.exp-group {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.exp-group summary {
+  cursor: pointer;
+  padding: .7rem 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .2rem .7rem;
+  align-items: baseline;
+}
+.exp-group summary::marker { color: var(--accent); }
+.exp-group .exp-cat { font-weight: 700; }
+.exp-group .exp-count { font-size: .8rem; color: #857a68; }
+.exp-group .exp-sub { font-size: .82rem; color: #857a68; margin-left: auto; }
+.exp-group .exp-items { padding: 0 .8rem .8rem; display: flex; flex-direction: column; gap: .5rem; }
+.exp-group[open] summary { border-bottom: 1px dashed var(--line); margin-bottom: .6rem; }
+
 /* 風險建議卡（語氣中性「建議留意」；無對應規則整區隱藏） */
 .ins-risk-card {
   background: #fdf8ec;

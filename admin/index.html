@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex">
   <title>旅遊手帳｜後臺</title>
-  <link rel="stylesheet" href="css/admin.css?v=14">
+  <link rel="stylesheet" href="css/admin.css?v=15">
 </head>
 <body>
 
@@ -264,9 +264,8 @@
     <!-- 記帳 -->
     <main id="tab-expenses" class="tab-panel" hidden>
       <h2>記帳（🔒 僅自己可見，前臺不顯示）</h2>
-      <div id="expense-summary" class="expense-summary"></div>
-      <div id="expense-list" class="list"></div>
 
+      <!-- 掃描與輸入置頂：進頁面即可開始記帳，不必滑過帳單清單 -->
       <h2>🧾 拍收據辨識</h2>
       <div class="form-grid ai-box">
         <label class="full">選擇/拍攝收據照片（AI 只會解析並預填下方表單，仍需你確認後才會儲存）
@@ -318,6 +317,10 @@
           <button type="button" id="expense-form-reset">清空/取消編輯</button>
         </div>
       </form>
+
+      <h2>帳單清單（依類別收合，點類別展開）</h2>
+      <div id="expense-summary" class="expense-summary"></div>
+      <div id="expense-list" class="list"></div>
     </main>
 
     <!-- 照片 -->
@@ -484,18 +487,18 @@
   </section>
 
   <script type="module">
-    import { initAuth } from './js/auth.js?v=14';
-    import { initTrips, loadTrips } from './js/trips.js?v=14';
-    import { initFlights, loadFlights } from './js/flights.js?v=14';
-    import { initStays, loadStays } from './js/stays.js?v=14';
-    import { initTransport, loadTransport } from './js/transport.js?v=14';
-    import { initItinerary, loadItinerary } from './js/itinerary.js?v=14';
-    import { initExpenses, loadExpenses } from './js/expenses.js?v=14';
-    import { initPhotos, loadPhotos } from './js/photos.js?v=14';
-    import { initPosts, loadPosts } from './js/posts.js?v=14';
-    import { initAi, loadAi } from './js/ai.js?v=14';
-    import { initWeather } from './js/weather.js?v=14';
-    import { initInsurance, loadInsurance } from './js/insurance.js?v=14';
+    import { initAuth } from './js/auth.js?v=15';
+    import { initTrips, loadTrips } from './js/trips.js?v=15';
+    import { initFlights, loadFlights } from './js/flights.js?v=15';
+    import { initStays, loadStays } from './js/stays.js?v=15';
+    import { initTransport, loadTransport } from './js/transport.js?v=15';
+    import { initItinerary, loadItinerary } from './js/itinerary.js?v=15';
+    import { initExpenses, loadExpenses } from './js/expenses.js?v=15';
+    import { initPhotos, loadPhotos } from './js/photos.js?v=15';
+    import { initPosts, loadPosts } from './js/posts.js?v=15';
+    import { initAi, loadAi } from './js/ai.js?v=15';
+    import { initWeather } from './js/weather.js?v=15';
+    import { initInsurance, loadInsurance } from './js/insurance.js?v=15';
 
     const loginView = document.getElementById('login-view');
     const appView = document.getElementById('app-view');

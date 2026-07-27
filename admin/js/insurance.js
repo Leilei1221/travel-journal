@@ -4,7 +4,7 @@
 // 風險/健康/文化留待後續批次
 // 鐵則：資料缺什麼就不顯示什麼，程式端絕不臆測或補預設值；
 //       簽證卡只放 apply_url、比較表只放 enroll_url 這一個官方連結
-import { supabase, esc, toast } from './supabase-client.js?v=14';
+import { supabase, esc, toast } from './supabase-client.js?v=15';
 
 const VERIFIED = new Set(['已建檔', 'verified']);
 const CATEGORY_ORDER = ['免簽', '電子簽', '落地簽', '須事先辦簽'];

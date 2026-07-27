@@ -1,7 +1,7 @@
 // 記帳 CRUD — expenses 表 RLS 僅本人可讀寫，前臺永不撈取
 // 可選擇性關聯到目前旅程的某筆住宿/航班/交通卡片（擇一）
-import { supabase, SUPABASE_URL, SUPABASE_KEY, esc, toast } from './supabase-client.js?v=14';
-import { setAiStatus } from './ai.js?v=14';
+import { supabase, SUPABASE_URL, SUPABASE_KEY, esc, toast } from './supabase-client.js?v=15';
+import { setAiStatus } from './ai.js?v=15';
 
 const RECEIPT_MAX_EDGE = 1200;
 
@@ -94,6 +94,10 @@ async function loadLinkOptions() {
     + group('交通卡片', cards.data, 'card', r => r.title);
 }
 
+// 分類折疊清單的類別順序與圖示（未知類別排最後）
+const CATEGORY_ORDER = ['住宿', '機票', '餐飲', '交通', '門票', '購物', '其他'];
+const CATEGORY_ICON = { 住宿: '🏨', 機票: '✈️', 餐飲: '🍜', 交通: '🚌', 門票: '🎫', 購物: '🛍️', 其他: '🧾' };
+
 async function loadList() {
   const listEl = document.getElementById('expense-list');
   const { data, error } = await supabase
@@ -110,11 +114,10 @@ async function loadList() {
     : x.transport_cards ? `🚕 ${x.transport_cards.title}`
     : null;
 
-  listEl.innerHTML = data.length
-    ? data.map(x => `
+  const cardHtml = x => `
       <div class="card" data-id="${x.id}">
         <div class="card-body">
-          <span class="badge">${esc(x.category)}</span> <strong>${esc(x.title)}</strong>
+          <strong>${esc(x.title)}</strong>
           <span>${esc(x.currency)} ${Number(x.amount).toLocaleString()}</span>
           ${x.amount_twd != null ? `<span class="muted">≈ NT$ ${Number(x.amount_twd).toLocaleString()}</span>` : ''}
           <div class="muted">
@@ -128,7 +131,41 @@ async function loadList() {
           <button data-action="edit">編輯</button>
           <button data-action="delete" class="danger">刪除</button>
         </div>
-      </div>`).join('')
+      </div>`;
+
+  // 依類別分組（帳單太多拉太長，收合起來好找；組內維持日期排序）
+  const groups = new Map();
+  for (const x of data) {
+    const cat = x.category || '其他';
+    if (!groups.has(cat)) groups.set(cat, []);
+    groups.get(cat).push(x);
+  }
+  const cats = [
+    ...CATEGORY_ORDER.filter(c => groups.has(c)),
+    ...[...groups.keys()].filter(c => !CATEGORY_ORDER.includes(c)),
+  ];
+  // 重新整理（儲存/刪除後）保留原本展開的類別
+  const openCats = new Set([...listEl.querySelectorAll('details[open]')].map(d => d.dataset.cat));
+
+  const groupSubtotal = list => {
+    const by = {};
+    for (const x of list) by[x.currency] = (by[x.currency] ?? 0) + Number(x.amount);
+    return Object.entries(by).map(([c, v]) => `${esc(c)} ${v.toLocaleString()}`).join('｜');
+  };
+
+  listEl.innerHTML = data.length
+    ? cats.map(cat => {
+      const list = groups.get(cat);
+      return `
+      <details class="exp-group" data-cat="${esc(cat)}"${openCats.has(cat) ? ' open' : ''}>
+        <summary>
+          <span class="exp-cat">${CATEGORY_ICON[cat] ?? '📌'} ${esc(cat)}</span>
+          <span class="exp-count">${list.length} 筆</span>
+          <span class="exp-sub">${groupSubtotal(list)}</span>
+        </summary>
+        <div class="exp-items">${list.map(cardHtml).join('')}</div>
+      </details>`;
+    }).join('')
     : '<p class="muted">尚無記帳。</p>';
 
   // 小計：各幣別合計＋臺幣約當總計
@@ -169,6 +206,8 @@ function fillForm(x) {
     : x.flight_id ? `flight:${x.flight_id}`
     : x.transport_card_id ? `card:${x.transport_card_id}`
     : '';
+  // 清單在頁面下方，編輯時捲回頂部表單
+  f.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function resetForm() {
