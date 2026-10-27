@@ -1,6 +1,6 @@
 // Trip 建立、編輯與選取
-import { supabase, esc, toast } from './supabase-client.js?v=15';
-import { callGemini, setAiStatus } from './ai.js?v=15';
+import { supabase, esc, toast } from './supabase-client.js?v=16';
+import { callGemini, setAiStatus } from './ai.js?v=16';
 
 const STATUS_LABEL = { planning: '規劃中', traveling: '旅途中', done: '已完成' };
 let onSelectTrip = () => {};

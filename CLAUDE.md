@@ -32,7 +32,7 @@
 
 ## 快取版本控制（重要）
 
-前臺與後臺的 CSS/JS 皆以 `?v=N` 版本參數載入（`front.css`、`admin.css`、所有 JS module import 與入口 script）。**改動 CSS/JS 後務必同步遞增版本號**（目前 v15），否則使用者瀏覽器會在 GitHub Pages 10 分鐘快取內載到舊檔造成「改了沒反應」。
+前臺與後臺的 CSS/JS 皆以 `?v=N` 版本參數載入（`front.css`、`admin.css`、所有 JS module import 與入口 script）。**改動 CSS/JS 後務必同步遞增版本號**（目前 v16），否則使用者瀏覽器會在 GitHub Pages 10 分鐘快取內載到舊檔造成「改了沒反應」。
 
 ## 進度
 
@@ -44,7 +44,7 @@
   - 追加：✅ 照片打卡位置（location_name＋GPS 座標，後臺「用目前位置打卡」；前臺照片牆 📍 Maps 連結）
   - 待辦：Google Places 住宿/景點抓取（§9）
 - Phase 3：✅ Edge Function `gemini-draft`（金鑰只在函式環境變數、驗證登入、鏡像檔 `supabase/functions/gemini-draft/index.ts`）✅ AI 遊記草稿＋歷史行程回填（後臺文章頁籤「AI 草稿助手」，產出填入表單為草稿、原文存 ai_draft）✅ FB 貼文產生器（自動附前臺連結，複製貼上發文）✅ 旅程專屬背景插畫（mode: background 用 gemini-2.5-flash-image 依目的地＋主題色生成；後臺旅程編輯「生成→預覽→套用」，存 Storage backgrounds/{tripId}.webp＋trips.bg_image_url；前臺以 --bg-image CSS 變數覆寫，未設定用預設 bg-doodle）
-- 修補：✅ AI 功能失敗一律於按鈕旁顯示紅底錯誤訊息（不再只靠可能捲出畫面的 toast）✅ 封面照改縮圖挑選器（保留貼網址進階）✅ 照片牆重整（排除住宿/文章關聯照，依打卡地點分組、精選 1–2 張＋收合，配圖直接顯示於文章內）✅ 全站 CSS/JS 加 ?v= 版本參數解決快取 ✅ 記帳頁改版（拍收據辨識與輸入表單置頂、帳單清單依類別折疊——組標題含筆數與各幣別小計、展開狀態於重載後保留、編輯自動捲回頂部表單）
+- 修補：✅ AI 功能失敗一律於按鈕旁顯示紅底錯誤訊息（不再只靠可能捲出畫面的 toast）✅ 封面照改縮圖挑選器（保留貼網址進階）✅ 照片牆重整（排除住宿/文章關聯照，依打卡地點分組、精選 1–2 張＋收合，配圖直接顯示於文章內）✅ 全站 CSS/JS 加 ?v= 版本參數解決快取 ✅ 記帳頁改版（拍收據辨識與輸入表單置頂、帳單清單依類別折疊——組標題含筆數與各幣別小計、展開狀態於重載後保留、編輯自動捲回頂部表單）✅ 前後臺視覺風格修訂（融合原手帳感＋圓角粗框卡片／藥丸按鈕／俏皮位移陰影，呼應參考圖「旅圖 LUTU」的比例；只改 `:root` 共用設計變數與各頁共用元件的 border/border-radius/box-shadow，不動任何資料邏輯與既有 class 結構；新變數 `--outline`/`--radius-sm,md,lg,pill`/`--pop,--pop-sm`）
 - Phase 4：✅ 航班狀態查詢（後臺航班卡「查航班狀態」開 Google 即時航班資訊，零 API 費用）✅ A5 PDF 小書（`book.html?id=`＋book.css/book.js：154×216mm 含 3mm 出血、封面/行程/遊記/照片牆 2×2/封底、段落級自動分頁；後臺旅程卡「📖 小書」開啟，瀏覽器「另存為 PDF、邊界無、含背景圖形」匯出）✅ Gmail 異動信解析流程（見下）
 - Phase 4 追加：✅ 後臺頂部天氣卡（`admin/js/weather.js`，Open-Meteo 免金鑰；瀏覽器定位優先，被拒則顯示城市輸入框改用 geocoding API）
   - ✅ 記帳拍收據辨識（`gemini-draft` Edge Function `receipt` mode，Gemini Vision 解析收據圖片回傳 JSON；前端壓縮至 1200px→base64→呼叫→預填記帳表單，仍需人工確認才儲存；**已部署 version 3**）

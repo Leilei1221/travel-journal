@@ -1,4 +1,4 @@
-/* 後臺樣式 — 簡潔實用優先；手帳感視覺留給 Phase 2 前臺 */
+/* 後臺樣式 — 奶茶色底＋圓角粗框卡片＋藥丸按鈕（融合手帳感與日系可愛 App 的俏皮比例，PLAN.md 風格修訂） */
 :root {
   --main: #7a9e9f;
   --accent: #e07a5f;
@@ -6,6 +6,13 @@
   --ink: #3d3a34;
   --line: #ddd5c8;
   --danger: #c0392b;
+  --outline: color-mix(in srgb, var(--ink) 60%, transparent);
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+  --pop: 3px 3px 0 color-mix(in srgb, var(--ink) 20%, transparent);
+  --pop-sm: 2px 2px 0 color-mix(in srgb, var(--ink) 18%, transparent);
 }
 
 * { box-sizing: border-box; }
@@ -21,36 +28,42 @@ h1 { font-size: 1.3rem; margin: 0; }
 h2 { font-size: 1.05rem; border-bottom: 2px solid var(--line); padding-bottom: .3rem; margin-top: 2rem; }
 .muted { color: #8a8578; font-size: .85rem; }
 
+/* 藥丸按鈕＋俏皮位移陰影；按下去陰影收起、位置下壓，像被按扁的回饋感 */
 button {
   font: inherit;
-  padding: .4rem .9rem;
-  border: 1px solid var(--main);
-  border-radius: 6px;
+  font-weight: 700;
+  padding: .5rem 1.15rem;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-pill);
   background: var(--main);
   color: #fff;
   cursor: pointer;
+  box-shadow: var(--pop);
+  transition: transform .12s ease-out, box-shadow .12s ease-out, filter .12s;
 }
-button:hover { filter: brightness(1.08); }
-button:disabled { opacity: .5; cursor: not-allowed; }
-button.danger { background: #fff; color: var(--danger); border-color: var(--danger); }
+button:hover { filter: brightness(1.06); }
+button:active { transform: translate(2px, 2px); box-shadow: none; }
+button:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; transform: none; }
+button.danger { background: #fff; color: var(--danger); border-color: var(--danger); box-shadow: var(--pop-sm); }
 
 a.btn-link {
   display: inline-block;
-  padding: .4rem .9rem;
-  border: 1px solid var(--main);
-  border-radius: 6px;
+  padding: .4rem 1rem;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-pill);
   background: #fff;
-  color: var(--main);
+  color: var(--ink);
   text-decoration: none;
   font-size: .9rem;
+  font-weight: 700;
 }
 a.btn-link:hover { background: var(--paper); }
 
 .expense-summary {
   background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: .8rem 1rem;
+  border: 2px solid var(--outline);
+  border-radius: var(--radius-lg);
+  padding: .8rem 1.1rem;
   margin-bottom: .8rem;
   font-size: .9rem;
 }
@@ -62,8 +75,8 @@ a.btn-link:hover { background: var(--paper); }
   margin: 18vh auto;
   padding: 2rem;
   background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 12px;
+  border: 2px solid var(--outline);
+  border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -76,7 +89,7 @@ a.btn-link:hover { background: var(--paper); }
   align-items: center;
   padding: .8rem 1.2rem;
   background: #fff;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 2px solid var(--line);
 }
 
 .current-trip-bar {
@@ -84,22 +97,26 @@ a.btn-link:hover { background: var(--paper); }
   background: var(--accent);
   color: #fff;
   font-size: .9rem;
+  font-weight: 700;
 }
 
 .tabs {
   display: flex;
-  gap: .3rem;
-  padding: .6rem 1.2rem 0;
-  border-bottom: 1px solid var(--line);
+  gap: .4rem;
+  flex-wrap: wrap;
+  padding: .7rem 1.2rem;
+  background: #fff;
+  border-bottom: 2px solid var(--line);
 }
 .tab {
-  background: transparent;
+  font-weight: 700;
+  background: #fff;
   color: var(--ink);
-  border: 1px solid var(--line);
-  border-bottom: none;
-  border-radius: 8px 8px 0 0;
+  border: 2px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: .4rem .9rem;
 }
-.tab.active { background: #fff; border-color: var(--main); font-weight: 700; }
+.tab.active { background: var(--main); border-color: var(--ink); color: #fff; box-shadow: var(--pop-sm); }
 
 .tab-panel { max-width: 860px; margin: 0 auto; padding: 1rem 1.2rem 4rem; }
 
@@ -109,9 +126,9 @@ a.btn-link:hover { background: var(--paper); }
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: .8rem;
   background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 1rem;
+  border: 2px solid var(--outline);
+  border-radius: var(--radius-lg);
+  padding: 1.1rem;
 }
 .form-grid label { display: flex; flex-direction: column; gap: .25rem; font-size: .9rem; }
 .form-grid label.checkbox { flex-direction: row; align-items: center; gap: .5rem; }
@@ -120,9 +137,9 @@ a.btn-link:hover { background: var(--paper); }
 
 input, select, textarea {
   font: inherit;
-  padding: .45rem .6rem;
-  border: 1px solid var(--line);
-  border-radius: 6px;
+  padding: .5rem .7rem;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
   background: #fffdf8;
 }
 /* 編輯框拉高（不拉寬），可再手動往下拖 */
@@ -132,32 +149,32 @@ textarea { min-height: 7.5rem; resize: vertical; line-height: 1.6; }
 .edit-preview {
   grid-column: 1 / -1;
   max-width: 260px;
-  border-radius: 8px;
-  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  border: 2px solid var(--line);
 }
 .photo-actions { display: flex; gap: .3rem; flex-shrink: 0; }
-.photo-actions button { padding: .2rem .6rem; font-size: .8rem; }
-.ai-box { border: 1.5px dashed var(--accent); background: #fdf6f0; }
+.photo-actions button { padding: .25rem .7rem; font-size: .8rem; }
+.ai-box { border: 2px dashed var(--accent); background: #fdf6f0; border-radius: var(--radius-lg); }
 
 /* AI 狀態列：失敗一定顯示明確訊息（紅底），成功綠字 */
 .ai-error {
   color: #fff !important;
   background: var(--danger);
-  padding: .25rem .6rem;
-  border-radius: 6px;
+  padding: .3rem .7rem;
+  border-radius: var(--radius-sm);
   font-size: .85rem;
 }
 .ai-ok { color: #2e7d5b !important; font-weight: 700; }
 
 /* 封面照挑選器 */
-.cover-fieldset { border: 1px dashed var(--line); border-radius: 8px; }
+.cover-fieldset { border: 2px dashed var(--line); border-radius: var(--radius-lg); }
 .cover-thumbs { display: flex; flex-wrap: wrap; gap: .5rem; }
 .cover-thumb {
   padding: 0;
   width: 88px;
   height: 66px;
   border: 2px solid var(--line);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
   background: none;
   cursor: pointer;
@@ -168,23 +185,11 @@ textarea { min-height: 7.5rem; resize: vertical; line-height: 1.6; }
 .cover-advanced summary { cursor: pointer; color: var(--main); }
 .cover-advanced input { margin-top: .4rem; width: 100%; }
 
-a.btn-link {
-  display: inline-block;
-  padding: .35rem .8rem;
-  border: 1px solid var(--main);
-  border-radius: 6px;
-  background: #fff;
-  color: var(--main);
-  text-decoration: none;
-  font-size: .85rem;
-}
-a.btn-link:hover { background: var(--paper); }
-
 .checkin-row { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
 .checkin-row .checkin-clear { background: #fff; color: var(--ink); border-color: var(--line); font-size: .8rem; }
 input[type="color"] { padding: 0; height: 2.2rem; width: 4rem; }
 
-fieldset { border: 1px dashed var(--line); border-radius: 8px; display: grid; gap: .8rem; }
+fieldset { border: 2px dashed var(--line); border-radius: var(--radius-lg); display: grid; gap: .8rem; }
 .theme-fieldset { grid-template-columns: repeat(3, auto); justify-content: start; }
 .private-fieldset {
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -194,18 +199,18 @@ fieldset { border: 1px dashed var(--line); border-radius: 8px; display: grid; ga
 .private-fieldset legend { color: var(--accent); font-weight: 700; }
 
 /* 清單卡片 */
-.list { display: flex; flex-direction: column; gap: .6rem; }
+.list { display: flex; flex-direction: column; gap: .7rem; }
 .card {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
   background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: .8rem 1rem;
+  border: 2px solid var(--outline);
+  border-radius: var(--radius-lg);
+  padding: .9rem 1.1rem;
 }
-.card.selected { border: 2px solid var(--accent); }
+.card.selected { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
 .card-actions { display: flex; gap: .4rem; flex-shrink: 0; }
 /* 文章卡：內文可展開，長文時按鈕靠上不置中 */
 .post-card { align-items: flex-start; }
@@ -213,20 +218,22 @@ fieldset { border: 1px dashed var(--line); border-radius: 8px; display: grid; ga
 .post-preview p { margin: .35rem 0 0; font-size: .88rem; line-height: 1.6; overflow-wrap: anywhere; }
 .post-toggle {
   margin-top: .5rem;
-  padding: .2rem .7rem;
+  padding: .25rem .8rem;
   font-size: .8rem;
   background: #fff;
   color: var(--main);
-  border: 1px solid var(--main);
-  border-radius: 999px;
+  border: 2px solid var(--main);
+  border-radius: var(--radius-pill);
+  box-shadow: none;
 }
 .private-field { color: var(--accent); font-size: .85rem; }
 
 .badge {
   display: inline-block;
   font-size: .75rem;
-  padding: .1rem .5rem;
-  border-radius: 99px;
+  font-weight: 600;
+  padding: .15rem .65rem;
+  border-radius: var(--radius-pill);
   background: var(--line);
 }
 .badge-planning { background: #f4e9c8; }
@@ -238,9 +245,9 @@ fieldset { border: 1px dashed var(--line); border-radius: 8px; display: grid; ga
 .photo-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: .8rem;
+  gap: .9rem;
 }
-.photo-item { margin: 0; background: #fff; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.photo-item { margin: 0; background: #fff; border: 2px solid var(--outline); border-radius: var(--radius-md); overflow: hidden; }
 .photo-item img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
 /* 直向堆疊：徽章列／說明列／按鈕列各自一行，關聯再多也擠不掉按鈕 */
 .photo-item figcaption {
@@ -248,7 +255,7 @@ fieldset { border: 1px dashed var(--line); border-radius: 8px; display: grid; ga
   flex-direction: column;
   align-items: stretch;
   gap: .3rem;
-  padding: .4rem .6rem;
+  padding: .5rem .65rem;
   font-size: .8rem;
 }
 .photo-tags { display: flex; flex-wrap: wrap; gap: .25rem; min-width: 0; }
@@ -257,7 +264,7 @@ fieldset { border: 1px dashed var(--line); border-radius: 8px; display: grid; ga
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: .72rem;
-  padding: .05rem .45rem;
+  padding: .1rem .5rem;
 }
 .photo-meta { color: #857a68; overflow-wrap: anywhere; }
 .photo-item .photo-actions { justify-content: flex-end; }
@@ -265,21 +272,22 @@ fieldset { border: 1px dashed var(--line); border-radius: 8px; display: grid; ga
 /* 天氣卡 */
 .weather-card {
   margin: .8rem 1.2rem 0;
-  padding: .7rem 1rem;
+  padding: .8rem 1.1rem;
   background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 10px;
+  border: 2px solid var(--outline);
+  border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
   gap: .5rem;
 }
 .weather-head { display: flex; justify-content: space-between; align-items: center; font-weight: 700; }
 .weather-retry {
-  padding: .2rem .6rem;
+  padding: .25rem .7rem;
   font-size: .8rem;
   background: #fff;
   color: var(--main);
   border-color: var(--main);
+  box-shadow: none;
 }
 .weather-city-form { display: flex; gap: .5rem; }
 .weather-city-form input { flex: 1; }
@@ -291,7 +299,7 @@ fieldset { border: 1px dashed var(--line); border-radius: 8px; display: grid; ga
 .weather-range { color: #8a8578; }
 
 /* 每日行程：一天一區塊 */
-.day-block { margin-bottom: 1.4rem; padding-bottom: .6rem; border-bottom: 1px solid var(--line); }
+.day-block { margin-bottom: 1.4rem; padding-bottom: .6rem; border-bottom: 2px dashed var(--line); }
 .day-head { font-size: 1.05rem; color: var(--main); margin: 0 0 .5rem; }
 .day-head .muted { font-weight: 400; }
 .day-empty { font-size: .85rem; padding: .3rem 0 .6rem; }
@@ -301,21 +309,22 @@ fieldset { border: 1px dashed var(--line); border-radius: 8px; display: grid; ga
   gap: .5rem;
   flex-wrap: wrap;
   background: color-mix(in srgb, var(--main) 8%, #fff);
-  border: 1px dashed var(--line);
-  border-radius: 8px;
-  padding: .45rem .7rem;
+  border: 2px dashed var(--line);
+  border-radius: var(--radius-md);
+  padding: .5rem .8rem;
   margin-bottom: .5rem;
   font-size: .9rem;
 }
 .auto-badge {
   margin-left: auto;
   font-size: .72rem;
+  font-weight: 600;
   background: var(--main);
   color: #fff;
-  border-radius: 99px;
-  padding: .05rem .5rem;
+  border-radius: var(--radius-pill);
+  padding: .1rem .55rem;
 }
-.day-block .card { border-left: 3px solid var(--accent); }
+.day-block .card { border-left: 5px solid var(--accent); }
 .day-block .card-body .btn-link { margin-top: .4rem; display: inline-block; }
 
 /* Toast */
@@ -326,22 +335,22 @@ fieldset { border: 1px dashed var(--line); border-radius: 8px; display: grid; ga
   transform: translateX(-50%);
   background: var(--ink);
   color: #fff;
-  padding: .6rem 1.2rem;
-  border-radius: 8px;
+  padding: .6rem 1.3rem;
+  border-radius: var(--radius-pill);
   z-index: 99;
 }
 .toast-error { background: var(--danger); }
 
 /* ── 旅平險投保決策 ── */
-.ins-countries-box { border: 1px dashed var(--line); border-radius: 8px; }
+.ins-countries-box { border: 2px dashed var(--line); border-radius: var(--radius-lg); }
 .ins-chips { display: flex; flex-wrap: wrap; gap: .45rem; }
 .form-grid label.ins-chip {
   flex-direction: row;
   align-items: center;
   gap: .35rem;
-  padding: .25rem .75rem;
-  border: 1px solid var(--line);
-  border-radius: 999px;
+  padding: .3rem .8rem;
+  border: 2px solid var(--line);
+  border-radius: var(--radius-pill);
   background: #fff;
   cursor: pointer;
   font-size: .9rem;
@@ -352,9 +361,9 @@ fieldset { border: 1px dashed var(--line); border-radius: 8px; display: grid; ga
 
 .ins-overview {
   background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: .5rem 1rem;
+  border: 2px solid var(--outline);
+  border-radius: var(--radius-lg);
+  padding: .5rem 1.1rem;
 }
 .ins-cat { display: flex; gap: .7rem; align-items: baseline; padding: .4rem 0; border-bottom: 1px dashed var(--line); font-size: .9rem; }
 .ins-cat:last-child { border-bottom: none; }
@@ -362,8 +371,8 @@ fieldset { border: 1px dashed var(--line); border-radius: 8px; display: grid; ga
   flex-shrink: 0;
   background: var(--main);
   color: #fff;
-  border-radius: 999px;
-  padding: .1rem .6rem;
+  border-radius: var(--radius-pill);
+  padding: .1rem .65rem;
   font-size: .8rem;
   white-space: nowrap;
 }
@@ -371,15 +380,15 @@ fieldset { border: 1px dashed var(--line); border-radius: 8px; display: grid; ga
 .ins-card { align-items: flex-start; }
 .ins-card .card-body { min-width: 0; }
 .ins-country { margin: 0 0 .4rem; font-size: 1.05rem; color: var(--main); }
-.ins-unfiled { border: 1.5px dashed var(--line); }
+.ins-unfiled { border: 2px dashed var(--line); }
 .ins-visa-head { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin-bottom: .35rem; }
 .ins-fee-row { display: flex; align-items: baseline; gap: .5rem; margin: .25rem 0; }
 .ins-fee { font-size: 1.5rem; font-weight: 700; }
 .ins-fee-warning {
   background: #fdecea;
   color: var(--danger);
-  border-radius: 8px;
-  padding: .45rem .7rem;
+  border-radius: var(--radius-md);
+  padding: .5rem .75rem;
   font-size: .85rem;
   margin: .3rem 0 .5rem;
 }
@@ -388,9 +397,9 @@ fieldset { border: 1px dashed var(--line); border-radius: 8px; display: grid; ga
 .ins-visa .btn-link { margin-top: .2rem; }
 .ins-timing {
   background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: .45rem .7rem;
+  border: 2px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: .5rem .75rem;
   font-size: .9rem;
   margin-top: .5rem;
 }
@@ -399,17 +408,17 @@ fieldset { border: 1px dashed var(--line); border-radius: 8px; display: grid; ga
 /* 保障比較表 */
 .ins-notice {
   background: #fdf3e3;
-  border: 1px solid #e8c98a;
-  border-radius: 8px;
-  padding: .55rem .8rem;
+  border: 2px solid #e8c98a;
+  border-radius: var(--radius-md);
+  padding: .6rem .85rem;
   font-size: .9rem;
   margin: .6rem 0 .4rem;
 }
 .ins-compare {
   overflow-x: auto;
   background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 10px;
+  border: 2px solid var(--outline);
+  border-radius: var(--radius-lg);
 }
 .ins-compare > .muted { padding: .8rem 1rem; display: block; }
 .ins-table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: .9rem; }
@@ -437,12 +446,12 @@ fieldset { border: 1px dashed var(--line); border-radius: 8px; display: grid; ga
 /* 記帳：類別折疊清單 */
 details.exp-group {
   background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 10px;
+  border: 2px solid var(--outline);
+  border-radius: var(--radius-lg);
 }
 .exp-group summary {
   cursor: pointer;
-  padding: .7rem 1rem;
+  padding: .75rem 1.1rem;
   display: flex;
   flex-wrap: wrap;
   gap: .2rem .7rem;
@@ -452,16 +461,16 @@ details.exp-group {
 .exp-group .exp-cat { font-weight: 700; }
 .exp-group .exp-count { font-size: .8rem; color: #857a68; }
 .exp-group .exp-sub { font-size: .82rem; color: #857a68; margin-left: auto; }
-.exp-group .exp-items { padding: 0 .8rem .8rem; display: flex; flex-direction: column; gap: .5rem; }
+.exp-group .exp-items { padding: 0 .9rem .9rem; display: flex; flex-direction: column; gap: .5rem; }
 .exp-group[open] summary { border-bottom: 1px dashed var(--line); margin-bottom: .6rem; }
 
 /* 風險建議卡（語氣中性「建議留意」；無對應規則整區隱藏） */
 .ins-risk-card {
   background: #fdf8ec;
-  border: 1px solid #e8c98a;
-  border-left: 4px solid #d9a441;
-  border-radius: 10px;
-  padding: .8rem 1rem;
+  border: 2px solid #e8c98a;
+  border-left: 5px solid #d9a441;
+  border-radius: var(--radius-lg);
+  padding: .9rem 1.1rem;
 }
 .ins-risk-head { display: flex; flex-wrap: wrap; gap: .2rem .6rem; align-items: baseline; }
 .ins-risk-title { font-weight: 700; color: #8a5a1a; }
@@ -488,11 +497,11 @@ button, .btn-link, .badge, .chip, .auto-badge, .tab, .weather-retry { white-spac
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    gap: .2rem;
-    padding: .5rem .8rem 0;
+    gap: .35rem;
+    padding: .6rem .8rem;
   }
   .tabs::-webkit-scrollbar { display: none; }
-  .tab { flex: 0 0 auto; padding: .45rem .7rem; font-size: .9rem; }
+  .tab { flex: 0 0 auto; padding: .4rem .8rem; font-size: .85rem; }
 
   .tab-panel { padding: 1rem .8rem 4rem; }
 
