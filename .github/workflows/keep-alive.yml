@@ -1,8 +1,14 @@
 # 定期 ping Supabase，避免免費專案因 7 天無活動被暫停
-# 需在 GitHub repo 設定兩個 Secrets：
-#   SUPABASE_URL      = https://xifaxliaarxxmvuqcpav.supabase.co
-#   SUPABASE_ANON_KEY = anon/publishable key（Settings → Secrets and variables → Actions）
-# 注意：GitHub 會在 repo 60 天無 commit 後停用排程 workflow，屆時會收到通知信，點一下 re-enable 即可。
+#
+# URL 與 anon/publishable key 直接寫死在這裡，不走 GitHub Secrets：
+# 這兩個值本來就是公開值（已內嵌在 admin/js/supabase-client.js、
+# assets/js/front-client.js 等前端程式碼中，任何訪客的瀏覽器都看得到，
+# 資料安全靠的是 Supabase RLS 而非這兩個值保密）。寫死在這裡可避免
+# Secrets 網頁「更新」畫面一定顯示空白、不小心存成空值把排程打壞的問題
+# （2026-09、2026-11 已各發生一次，兩次症狀都是 curl「找不到主機」）。
+#
+# 注意：GitHub 會在 repo 60 天無 commit 後停用排程 workflow，屆時會收到
+# 通知信，到 Actions 分頁點一下該 workflow 的「Enable workflow」即可。
 name: Supabase keep-alive
 
 on:
@@ -13,12 +19,15 @@ on:
 jobs:
   ping:
     runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: https://xifaxliaarxxmvuqcpav.supabase.co
+      SUPABASE_ANON_KEY: sb_publishable_RZiyLvWMs9dZ5etPv4CHuw_CT-h0hAO
     steps:
       - name: Ping Supabase REST API
         run: |
           code=$(curl -s -o /dev/null -w '%{http_code}' \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/trips?select=id&limit=1" \
-            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+            "${SUPABASE_URL}/rest/v1/trips?select=id&limit=1" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}")
           echo "Supabase 回應 HTTP $code"
           test "$code" = "200"
